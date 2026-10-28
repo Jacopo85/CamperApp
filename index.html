@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1f5548">
+  <meta name="description" content="Assistente condiviso per il camper">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./styles.css">
+  <title>Camper Compagno</title>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-mark">🚐</div>
+    <div><h1>Camper Compagno</h1><p>Il vostro viaggio, insieme</p></div>
+    <button id="logoutBtn" class="quiet hidden">Esci</button>
+  </header>
+
+  <main>
+    <section id="setupNotice" class="notice">
+      <strong>Configurazione iniziale</strong>
+      <p>Questa è la base della prima versione. Per attivare accesso e sincronizzazione occorre collegare il progetto Firebase seguendo il file README.</p>
+    </section>
+
+    <section id="authView" class="panel">
+      <h2>Accedi al vostro spazio</h2>
+      <p class="muted">Crea un account con email e password oppure accedi. Tu e tua moglie userete due account distinti.</p>
+      <label>Email<input id="email" type="email" autocomplete="email" placeholder="nome@email.it"></label>
+      <label>Password<input id="password" type="password" autocomplete="current-password" placeholder="Almeno 6 caratteri"></label>
+      <div class="button-row">
+        <button id="loginBtn">Accedi</button>
+        <button id="registerBtn" class="secondary">Crea account</button>
+      </div>
+      <p id="authMessage" class="status" role="status"></p>
+    </section>
+
+    <section id="groupView" class="panel hidden">
+      <h2>Gruppo familiare</h2>
+      <p class="muted">Il primo account crea il gruppo e condivide il codice d'invito con il secondo account.</p>
+      <label>Nome del gruppo<input id="groupName" type="text" value="Il nostro camper"></label>
+      <button id="createGroupBtn">Crea nuovo gruppo</button>
+      <div class="separator">oppure</div>
+      <label>Codice d'invito<input id="inviteCode" type="text" autocapitalize="characters" placeholder="Codice ricevuto"></label>
+      <button id="joinGroupBtn" class="secondary">Entra in un gruppo</button>
+      <p id="groupMessage" class="status" role="status"></p>
+    </section>
+
+    <section id="appView" class="hidden">
+      <div class="welcome-row">
+        <div><p class="eyebrow">SPAZIO CONDIVISO</p><h2 id="groupTitle">Il nostro camper</h2></div>
+        <span id="syncState" class="sync-pill">Non sincronizzato</span>
+      </div>
+
+      <nav class="tabs" aria-label="Sezioni">
+        <button class="tab active" data-tab="home">Home</button>
+        <button class="tab" data-tab="shopping">Spesa</button>
+        <button class="tab" data-tab="wishlist">Mete</button>
+        <button class="tab" data-tab="vehicle">Camper</button>
+      </nav>
+
+      <section id="tab-home" class="tab-panel">
+        <div class="hero">
+          <p class="eyebrow">PRONTI A PARTIRE</p>
+          <h2>Le cose importanti, a portata di mano.</h2>
+          <p>Liste condivise, mete salvate e collegamenti rapidi a Google Maps.</p>
+        </div>
+        <div class="dashboard-grid">
+          <button class="dash-card" data-goto="shopping"><span>🛒</span><strong>Lista della spesa</strong><small id="shoppingSummary">Caricamento…</small></button>
+          <button class="dash-card" data-goto="wishlist"><span>📍</span><strong>Mete dei desideri</strong><small id="wishlistSummary">Caricamento…</small></button>
+          <button class="dash-card" data-goto="vehicle"><span>🚐</span><strong>Profilo camper</strong><small>Dimensioni e limiti</small></button>
+          <a class="dash-card link-card" href="https://www.google.com/maps" target="_blank" rel="noopener"><span>🗺️</span><strong>Apri Google Maps</strong><small>La navigazione parte dal telefono collegato ad Android Auto</small></a>
+        </div>
+        <div class="notice"><strong>Nota sul camper</strong><p>Google Maps non garantisce percorsi compatibili con altezza, larghezza o peso del mezzo. Controllate sempre il tragitto e la segnaletica.</p></div>
+      </section>
+
+      <section id="tab-shopping" class="tab-panel hidden">
+        <div class="section-heading"><div><p class="eyebrow">LISTA CONDIVISA</p><h2>Lista della spesa</h2></div><button id="resetShoppingBtn" class="secondary compact">Azzera spunte</button></div>
+        <form id="shoppingForm" class="add-form">
+          <label class="grow">Prodotto<input id="itemName" required maxlength="100" placeholder="Es. acqua, carta cucina"></label>
+          <label class="quantity-label">Qtà<input id="itemQty" maxlength="30" placeholder="Es. 2 confezioni"></label>
+          <label>Categoria<select id="itemCategory"><option>Alimentari</option><option>Pulizia</option><option>Dotazioni</option><option>Ricambi</option><option>Altro</option></select></label>
+          <button type="submit">Aggiungi</button>
+        </form>
+        <p class="muted small">La lista resta salvata; quando vuoi, “Azzera spunte” rimette tutti gli articoli come non acquistati.</p>
+        <ul id="shoppingList" class="item-list"></ul>
+        <p id="shoppingEmpty" class="empty-state">La lista è vuota. Aggiungi il primo prodotto.</p>
+      </section>
+
+      <section id="tab-wishlist" class="tab-panel hidden">
+        <div class="section-heading"><div><p class="eyebrow">DA SCOPRIRE</p><h2>Mete dei desideri</h2></div></div>
+        <form id="wishlistForm" class="add-form wishlist-form">
+          <label class="grow">Nome della meta<input id="placeName" required maxlength="120" placeholder="Es. borgo, museo, lago"></label>
+          <label>Indirizzo o località<input id="placeAddress" maxlength="200" placeholder="Comune, Paese"></label>
+          <label>Priorità<select id="placePriority"><option value="media">Media</option><option value="alta">Alta</option><option value="bassa">Bassa</option></select></label>
+          <label>Note<textarea id="placeNotes" maxlength="1000" rows="2" placeholder="Cosa vorremmo vedere…"></textarea></label>
+          <button type="submit">Salva meta</button>
+        </form>
+        <ul id="wishlistList" class="item-list"></ul>
+        <p id="wishlistEmpty" class="empty-state">Non avete ancora salvato mete.</p>
+      </section>
+
+      <section id="tab-vehicle" class="tab-panel hidden">
+        <p class="eyebrow">DATI DEL MEZZO</p><h2>Il nostro camper</h2>
+        <form id="vehicleForm" class="vehicle-form">
+          <label>Lunghezza (m)<input id="vehicleLength" type="number" step="0.01" min="0" value="7.38" required></label>
+          <label>Larghezza (m)<input id="vehicleWidth" type="number" step="0.01" min="0" value="2.32" required></label>
+          <label>Altezza massima (m)<input id="vehicleHeight" type="number" step="0.01" min="0" value="2.95" required></label>
+          <label>Massa massima autorizzata (kg)<input id="vehicleMass" type="number" step="1" min="0" value="3500" required></label>
+          <button type="submit">Salva dati camper</button>
+        </form>
+        <div class="notice warning"><strong>Importante</strong><p>Queste misure sono promemoria per valutare soste e itinerari. La prima versione non calcola percorsi stradali certificati per camper e non può garantire che una strada sia transitabile.</p></div>
+      </section>
+      <footer class="app-footer">Camper Compagno · versione iniziale · <span id="userLabel"></span></footer>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

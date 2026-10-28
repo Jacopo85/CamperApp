@@ -1,0 +1,10 @@
+{
+  "name": "Camper Compagno",
+  "short_name": "Camper",
+  "description": "Assistente condiviso per il camper",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f3f6f4",
+  "theme_color": "#1f5548",
+  "icons": []
+}
