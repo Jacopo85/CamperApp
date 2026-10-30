@@ -56,6 +56,7 @@
         <button class="tab" data-tab="shopping">Spesa</button>
         <button class="tab" data-tab="wishlist">Mete</button>
         <button class="tab" data-tab="vehicle">Camper</button>
+        <button class="tab" data-tab="itinerary">Itinerario</button>
       </nav>
 
       <section id="tab-home" class="tab-panel">
@@ -68,6 +69,7 @@
           <button class="dash-card" data-goto="shopping"><span>🛒</span><strong>Lista della spesa</strong><small id="shoppingSummary">Caricamento…</small></button>
           <button class="dash-card" data-goto="wishlist"><span>📍</span><strong>Mete dei desideri</strong><small id="wishlistSummary">Caricamento…</small></button>
           <button class="dash-card" data-goto="vehicle"><span>🚐</span><strong>Profilo camper</strong><small>Dimensioni e limiti</small></button>
+          <button class="dash-card" data-goto="itinerary"><span>🧭</span><strong>Pianifica itinerario</strong><small>Partenza automatica o manuale</small></button>
           <a class="dash-card link-card" href="https://www.google.com/maps" target="_blank" rel="noopener"><span>🗺️</span><strong>Apri Google Maps</strong><small>La navigazione parte dal telefono collegato ad Android Auto</small></a>
         </div>
         <div class="notice"><strong>Nota sul camper</strong><p>Google Maps non garantisce percorsi compatibili con altezza, larghezza o peso del mezzo. Controllate sempre il tragitto e la segnaletica.</p></div>
@@ -97,6 +99,25 @@
         </form>
         <ul id="wishlistList" class="item-list"></ul>
         <p id="wishlistEmpty" class="empty-state">Non avete ancora salvato mete.</p>
+      </section>
+
+      <section id="tab-itinerary" class="tab-panel hidden">
+        <p class="eyebrow">PIANIFICA IL VIAGGIO</p><h2>Il vostro itinerario</h2>
+        <p class="muted">Scegli la posizione attuale oppure inserisci manualmente il punto di partenza. Poi indica la destinazione.</p>
+        <form id="itineraryForm" class="vehicle-form">
+          <label>Partenza (posizione o indirizzo)
+            <input id="routeOrigin" type="text" placeholder="Tocca ‘Rileva posizione’ oppure scrivi un luogo" required>
+          </label>
+          <div class="route-actions"><button id="locateBtn" type="button" class="secondary">📍 Rileva posizione</button><span id="locationStatus" class="muted small" role="status">La posizione verrà richiesta solo con il tuo consenso.</span></div>
+          <label>Destinazione
+            <input id="routeDestination" type="text" placeholder="Es. Firenze, Italia" required>
+          </label>
+          <label>Tappe intermedie (facoltative)
+            <input id="routeWaypoints" type="text" placeholder="Es. Parma; Bologna">
+          </label>
+          <button type="submit">Apri itinerario in Google Maps</button>
+        </form>
+        <div class="notice warning"><strong>Attenzione: percorso non certificato per camper</strong><p>Questa funzione apre Google Maps con partenza, destinazione ed eventuali tappe. Google Maps potrebbe non considerare altezza (2,95 m), larghezza (2,32 m), lunghezza (7,38 m) o massa (3.500 kg). Controlla sempre cartelli, divieti e limiti lungo il percorso: non considerare il tragitto automaticamente sicuro per il camper.</p></div>
       </section>
 
       <section id="tab-vehicle" class="tab-panel hidden">

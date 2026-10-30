@@ -103,6 +103,31 @@ $("wishlistForm").addEventListener("submit",async e=>{
 $("vehicleForm").addEventListener("submit",async e=>{
   e.preventDefault();try{await setDoc(doc(db,"groups",groupId,"settings","vehicle"),{length:Number($("vehicleLength").value),width:Number($("vehicleWidth").value),height:Number($("vehicleHeight").value),maxMassKg:Number($("vehicleMass").value),updatedAt:serverTimestamp(),updatedBy:currentUser.uid});toast("Dati camper salvati.");}catch(err){toast("Salvataggio non riuscito: "+err.message);}
 });
+
+// Itinerario: la posizione è richiesta solo quando l'utente tocca il pulsante.
+$("locateBtn").addEventListener("click",()=>{
+  const status=$("locationStatus");
+  if(!navigator.geolocation){status.textContent="Questo dispositivo non supporta la geolocalizzazione. Inserisci la partenza manualmente.";return;}
+  status.textContent="Ricerca della posizione in corso…";
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const {latitude,longitude}=pos.coords;
+    $("routeOrigin").value=`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+    status.textContent="Posizione rilevata. Puoi modificarla manualmente se necessario.";
+  },err=>{
+    const reasons={1:"Permesso posizione negato.",2:"Posizione non disponibile.",3:"Richiesta scaduta."};
+    status.textContent=(reasons[err.code]||"Non riesco a rilevare la posizione.")+" Inserisci la partenza manualmente.";
+  },{enableHighAccuracy:true,timeout:15000,maximumAge:60000});
+});
+$("itineraryForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  const origin=$("routeOrigin").value.trim(),destination=$("routeDestination").value.trim();
+  if(!origin||!destination){toast("Inserisci partenza e destinazione.");return;}
+  const params=new URLSearchParams({api:"1",origin,destination,travelmode:"driving"});
+  const waypoints=$("routeWaypoints").value.trim();
+  if(waypoints)params.set("waypoints",waypoints.split(";").map(x=>x.trim()).filter(Boolean).join("|"));
+  window.open("https://www.google.com/maps/dir/?"+params.toString(),"_blank","noopener");
+});
+
 document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.tab)));
 document.querySelectorAll("[data-goto]").forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.goto)));
 onAuthStateChanged(auth,async user=>{

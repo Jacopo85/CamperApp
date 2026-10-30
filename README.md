@@ -82,3 +82,8 @@ Controlla sempre i limiti e le condizioni attuali del piano gratuito prima di di
 - La PWA non garantisce notifiche GPS affidabili quando è sospesa in background.
 - L'icona installabile dedicata va aggiunta in una fase successiva.
 - La sicurezza deve essere testata prima dell'uso reale; non usare dati sensibili in questa bozza.
+
+## Itinerario (prima versione)
+La sezione Itinerario permette di inserire manualmente la partenza oppure richiedere la posizione del dispositivo tramite il browser (solo dopo il consenso dell'utente), indicare una destinazione e tappe separate da punto e virgola. Il pulsante apre Google Maps con il percorso stradale.
+
+**Importante:** questa integrazione non calcola un percorso certificato per camper e Google Maps non garantisce il rispetto di altezza, larghezza, lunghezza o massa del veicolo. Verificare sempre segnaletica e limitazioni; non usare il percorso come garanzia di transitabilità.
