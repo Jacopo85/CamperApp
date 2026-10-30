@@ -117,6 +117,16 @@
           </label>
           <button type="submit">Apri itinerario in Google Maps</button>
         </form>
+        <div class="card route-stops-card">
+          <h3>Campeggi e aree sosta</h3>
+          <p class="muted">Cerca strutture vicino alla destinazione o alle tappe del viaggio. I risultati si aprono in Google Maps: verifica direttamente disponibilità, accesso e dimensioni ammesse.</p>
+          <div class="route-actions">
+            <button id="searchCampgroundsBtn" type="button" class="secondary">🏕️ Cerca campeggi</button>
+            <button id="searchStopoversBtn" type="button" class="secondary">🚐 Cerca aree sosta</button>
+          </div>
+          <div id="routeStopSearches" class="route-search-list" aria-live="polite"></div>
+          <p class="small muted">Le ricerche sono effettuate vicino ai luoghi indicati, non lungo un corridoio stradale calcolato. Controlla sempre distanza dalla strada, accessibilità e limiti del camper.</p>
+        </div>
         <div class="notice warning"><strong>Attenzione: percorso non certificato per camper</strong><p>Questa funzione apre Google Maps con partenza, destinazione ed eventuali tappe. Google Maps potrebbe non considerare altezza (2,95 m), larghezza (2,32 m), lunghezza (7,38 m) o massa (3.500 kg). Controlla sempre cartelli, divieti e limiti lungo il percorso: non considerare il tragitto automaticamente sicuro per il camper.</p></div>
       </section>
 

@@ -128,6 +128,30 @@ $("itineraryForm").addEventListener("submit",e=>{
   window.open("https://www.google.com/maps/dir/?"+params.toString(),"_blank","noopener");
 });
 
+// Ricerca di campeggi e aree sosta presso destinazione e tappe inserite.
+function routeSearchLocations(){
+  const destination=$("routeDestination").value.trim();
+  const waypoints=$("routeWaypoints").value.split(";").map(x=>x.trim()).filter(Boolean);
+  return [...new Set([destination,...waypoints].filter(Boolean))];
+}
+function openStopSearch(kind){
+  const locations=routeSearchLocations();
+  if(!locations.length){toast("Inserisci prima una destinazione o una tappa.");return;}
+  const label=kind==="campground"?"campeggi": "aree sosta camper";
+  const list=$("routeStopSearches");
+  list.replaceChildren();
+  locations.forEach(place=>{
+    const query=label+" vicino a "+place;
+    const link=document.createElement("a");
+    link.href="https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(query);
+    link.target="_blank";link.rel="noopener";link.textContent=label.charAt(0).toUpperCase()+label.slice(1)+" vicino a "+place+" ↗";
+    list.appendChild(link);
+  });
+  if(locations.length===1)window.open("https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(label+" vicino a "+locations[0]),"_blank","noopener");
+}
+$("searchCampgroundsBtn").addEventListener("click",()=>openStopSearch("campground"));
+$("searchStopoversBtn").addEventListener("click",()=>openStopSearch("stopover"));
+
 document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.tab)));
 document.querySelectorAll("[data-goto]").forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.goto)));
 onAuthStateChanged(auth,async user=>{

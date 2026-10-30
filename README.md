@@ -87,3 +87,7 @@ Controlla sempre i limiti e le condizioni attuali del piano gratuito prima di di
 La sezione Itinerario permette di inserire manualmente la partenza oppure richiedere la posizione del dispositivo tramite il browser (solo dopo il consenso dell'utente), indicare una destinazione e tappe separate da punto e virgola. Il pulsante apre Google Maps con il percorso stradale.
 
 **Importante:** questa integrazione non calcola un percorso certificato per camper e Google Maps non garantisce il rispetto di altezza, larghezza, lunghezza o massa del veicolo. Verificare sempre segnaletica e limitazioni; non usare il percorso come garanzia di transitabilità.
+
+
+### Ricerca di campeggi e aree sosta
+Nella sezione Itinerario sono disponibili collegamenti a ricerche Google Maps di campeggi e aree sosta vicino alla destinazione e alle tappe inserite. I risultati non sono verificati dall'app e non rappresentano una ricerca geospaziale lungo tutto il corridoio del percorso. Verificare sempre accessibilità, disponibilità, recensioni e limiti del veicolo prima di raggiungere una struttura.
