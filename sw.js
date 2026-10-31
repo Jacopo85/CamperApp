@@ -1,5 +1,5 @@
-const CACHE="camper-compagno-shell-v3";
-const SHELL=["./","./index.html","./styles.css","./manifest.webmanifest"];
+const CACHE="camper-compagno-shell-v4";
+const SHELL=["./","./index.html","./styles.css","./manifest.webmanifest","./guide.js","./vademecum-data.js"];
 self.addEventListener("install",event=>event.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL))));
 self.addEventListener("activate",event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))));
 self.addEventListener("fetch",event=>{

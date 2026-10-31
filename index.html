@@ -57,6 +57,7 @@
         <button class="tab" data-tab="wishlist">Mete</button>
         <button class="tab" data-tab="vehicle">Camper</button>
         <button class="tab" data-tab="itinerary">Itinerario</button>
+        <button class="tab" data-tab="guide">Europa</button>
       </nav>
 
       <section id="tab-home" class="tab-panel">
@@ -69,6 +70,7 @@
           <button class="dash-card" data-goto="shopping"><span>🛒</span><strong>Lista della spesa</strong><small id="shoppingSummary">Caricamento…</small></button>
           <button class="dash-card" data-goto="wishlist"><span>📍</span><strong>Mete dei desideri</strong><small id="wishlistSummary">Caricamento…</small></button>
           <button class="dash-card" data-goto="vehicle"><span>🚐</span><strong>Profilo camper</strong><small>Dimensioni e limiti</small></button>
+          <button class="dash-card" data-goto="guide"><span>🌍</span><strong>Europa in camper</strong><small>Norme da verificare e mete consigliate</small></button>
           <button class="dash-card" data-goto="itinerary"><span>🧭</span><strong>Pianifica itinerario</strong><small>Partenza automatica o manuale</small></button>
           <a class="dash-card link-card" href="https://www.google.com/maps" target="_blank" rel="noopener"><span>🗺️</span><strong>Apri Google Maps</strong><small>La navigazione parte dal telefono collegato ad Android Auto</small></a>
         </div>
@@ -130,6 +132,15 @@
         <div class="notice warning"><strong>Attenzione: percorso non certificato per camper</strong><p>Questa funzione apre Google Maps con partenza, destinazione ed eventuali tappe. Google Maps potrebbe non considerare altezza (2,95 m), larghezza (2,32 m), lunghezza (7,38 m) o massa (3.500 kg). Controlla sempre cartelli, divieti e limiti lungo il percorso: non considerare il tragitto automaticamente sicuro per il camper.</p></div>
       </section>
 
+      <section id="tab-guide" class="tab-panel hidden">
+        <p class="eyebrow">VADEMECUM EUROPEO · PRIMA EDIZIONE</p><h2>Europa in camper</h2>
+        <div class="notice warning"><strong>Schede turistiche preliminari</strong><p>Le destinazioni sono disponibili offline. Le norme locali NON sono ancora verificate Paese per Paese: questa sezione non autorizza sosta, campeggio o pernottamento. Prima di partire consulta le fonti ufficiali, i cartelli e le ordinanze locali.</p></div>
+        <label for="guideSearch">Cerca una regione o un Paese</label>
+        <input id="guideSearch" type="search" placeholder="Es. Toscana, Francia, San Marino">
+        <div id="guideList" class="guide-list"></div>
+        <article id="guideDetail" class="card guide-detail hidden" aria-live="polite"></article>
+      </section>
+
       <section id="tab-vehicle" class="tab-panel hidden">
         <p class="eyebrow">DATI DEL MEZZO</p><h2>Il nostro camper</h2>
         <form id="vehicleForm" class="vehicle-form">
@@ -145,6 +156,7 @@
     </section>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="./guide.js"></script>
   <script type="module" src="./app.js"></script>
 </body>
 </html>

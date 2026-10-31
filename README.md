@@ -91,3 +91,7 @@ La sezione Itinerario permette di inserire manualmente la partenza oppure richie
 
 ### Ricerca di campeggi e aree sosta
 Nella sezione Itinerario sono disponibili collegamenti a ricerche Google Maps di campeggi e aree sosta vicino alla destinazione e alle tappe inserite. I risultati non sono verificati dall'app e non rappresentano una ricerca geospaziale lungo tutto il corridoio del percorso. Verificare sempre accessibilità, disponibilità, recensioni e limiti del veicolo prima di raggiungere una struttura.
+
+
+## Vademecum Europa (catalogo preliminare)
+Nuova scheda Europa con 20 regioni italiane, San Marino, Vaticano e altri Paesi europei, consultabile offline dopo il primo caricamento. Il catalogo offre mete turistiche e una checklist normativa, NON una raccolta di leggi già verificate. Le fonti locali, le aree sosta e le norme di ciascuna giurisdizione richiedono ulteriore verifica prima dell'uso come guida normativa. Non sostituisce la segnaletica o le autorità competenti.
