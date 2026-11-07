@@ -16,7 +16,7 @@ service cloud.firestore {
         && request.resource.data.keys().hasAll(['email','groupId','updatedAt'])
         && ownEmail()
         && request.resource.data.groupId is string
-        && isMember(request.resource.data.groupId);
+        && existsAfter(/databases/$(database)/documents/groups/$(request.resource.data.groupId)/members/$(request.auth.uid));
       allow delete: if false;
     }
     match /invites/{code} {
@@ -32,8 +32,8 @@ service cloud.firestore {
         && request.resource.data.expiresAt is timestamp
         && request.resource.data.expiresAt > request.time
         && request.resource.data.expiresAt <= request.time + duration.value(8, 'd')
-        && exists(/databases/$(database)/documents/groups/$(request.resource.data.groupId))
-        && get(/databases/$(database)/documents/groups/$(request.resource.data.groupId)).data.ownerUid == request.auth.uid;
+        && existsAfter(/databases/$(database)/documents/groups/$(request.resource.data.groupId))
+        && getAfter(/databases/$(database)/documents/groups/$(request.resource.data.groupId)).data.ownerUid == request.auth.uid;
       allow update, delete: if false;
     }
     match /groups/{groupId} {
@@ -51,7 +51,7 @@ service cloud.firestore {
           && (
             (request.resource.data.role == 'owner'
              && request.resource.data.keys().hasOnly(['uid','email','role','joinedAt'])
-             && get(/databases/$(database)/documents/groups/$(groupId)).data.ownerUid == request.auth.uid)
+             && getAfter(/databases/$(database)/documents/groups/$(groupId)).data.ownerUid == request.auth.uid)
             ||
             (request.resource.data.role == 'member'
              && request.resource.data.keys().hasOnly(['uid','email','role','inviteCode','joinedAt'])
