@@ -91,10 +91,13 @@ $("logoutBtn").addEventListener("click",async()=>{cleanup();await signOut(auth);
 $("createGroupBtn").addEventListener("click",async()=>{
   try{
     msg("groupMessage","");const gid=randomGroupId(),code=inviteCode(),name=$("groupName").value.trim()||"Il nostro camper";
-    await setDoc(doc(db,"groups",gid),{name,ownerUid:currentUser.uid,createdAt:serverTimestamp()});
-    await setDoc(doc(db,"groups",gid,"members",currentUser.uid),{uid:currentUser.uid,email:currentUser.email,role:"owner",joinedAt:serverTimestamp()});
-    await setDoc(doc(db,"invites",code),{groupId:gid,createdBy:currentUser.uid,createdAt:serverTimestamp(),expiresAt:Timestamp.fromMillis(Date.now()+7*24*60*60*1000)});
-    await setDoc(doc(db,"users",currentUser.uid),{email:currentUser.email,groupId:gid,updatedAt:serverTimestamp()},{merge:true});
+    // Tutte le scritture devono riuscire insieme: niente gruppi orfani.
+    const batch=writeBatch(db);
+    batch.set(doc(db,"groups",gid),{name,ownerUid:currentUser.uid,createdAt:serverTimestamp()});
+    batch.set(doc(db,"groups",gid,"members",currentUser.uid),{uid:currentUser.uid,email:currentUser.email,role:"owner",joinedAt:serverTimestamp()});
+    batch.set(doc(db,"invites",code),{groupId:gid,createdBy:currentUser.uid,createdAt:serverTimestamp(),expiresAt:Timestamp.fromMillis(Date.now()+7*24*60*60*1000)});
+    batch.set(doc(db,"users",currentUser.uid),{email:currentUser.email,groupId:gid,updatedAt:serverTimestamp()},{merge:true});
+    await batch.commit();
     alert("Codice d'invito per il secondo account: "+code+"\nConservalo e inseriscilo dal secondo account.");
     await loadGroup(gid);
   }catch(e){msg("groupMessage",friendlyError(e));}
@@ -123,8 +126,11 @@ $("joinGroupBtn").addEventListener("click",async()=>{
     const invitation=inv.data();
     if(!invitation.expiresAt || invitation.expiresAt.toMillis()<=Date.now())throw new Error("Invito scaduto: richiedi un nuovo codice al proprietario.");
     const gid=invitation.groupId;
-    await setDoc(doc(db,"groups",gid,"members",currentUser.uid),{uid:currentUser.uid,email:currentUser.email,role:"member",inviteCode:code,joinedAt:serverTimestamp()});
-    await setDoc(doc(db,"users",currentUser.uid),{email:currentUser.email,groupId:gid,updatedAt:serverTimestamp()},{merge:true});
+    // Appartenenza e profilo sono aggiornati in modo atomico.
+    const batch=writeBatch(db);
+    batch.set(doc(db,"groups",gid,"members",currentUser.uid),{uid:currentUser.uid,email:currentUser.email,role:"member",inviteCode:code,joinedAt:serverTimestamp()});
+    batch.set(doc(db,"users",currentUser.uid),{email:currentUser.email,groupId:gid,updatedAt:serverTimestamp()},{merge:true});
+    await batch.commit();
     await loadGroup(gid);
   }catch(e){msg("groupMessage",friendlyError(e));}
 });
