@@ -1,7 +1,8 @@
 import {before, after, test} from 'node:test';
+import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {initializeTestEnvironment, assertFails, assertSucceeds} from '@firebase/rules-unit-testing';
-import {doc, getDoc, setDoc, updateDoc, serverTimestamp, Timestamp} from 'firebase/firestore';
+import {doc, getDoc, setDoc, updateDoc, serverTimestamp, Timestamp, onSnapshot} from 'firebase/firestore';
 
 let env;
 const rules = readFileSync(new URL('../firestore.rules', import.meta.url), 'utf8');
@@ -96,4 +97,84 @@ test('invito scaduto e profilo con gruppo arbitrario rifiutati', async () => {
 test('utente anonimo non accede agli inviti', async () => {
   const anonymous = env.unauthenticatedContext().firestore();
   await assertFails(getDoc(doc(anonymous, 'invites', 'ABCDEFGHJKLMNPQR')));
+});
+
+
+test('due account vedono aggiornamenti condivisi di spesa e mete', async () => {
+  const gid = 'shared-sync-group';
+  await seedGroup(gid);
+  await env.withSecurityRulesDisabled(async context => {
+    await setDoc(doc(context.firestore(), 'groups', gid, 'members', 'member'), {
+      uid: 'member', email: 'member@example.com', role: 'member',
+      inviteCode: 'ABCDEFGHJKLMNPQR', joinedAt: Timestamp.now()
+    });
+  });
+  const owner = dbFor('owner');
+  const member = dbFor('member');
+  const ownerItem = doc(owner, 'groups', gid, 'shopping', 'bread');
+  const memberItem = doc(member, 'groups', gid, 'shopping', 'bread');
+  await assertSucceeds(setDoc(ownerItem, {
+    name: 'Pane', checked: false, createdAt: serverTimestamp(), createdBy: 'owner'
+  }));
+  const sawUpdate = new Promise((resolve, reject) => {
+    let unsubscribe = () => {};
+    const timer = setTimeout(() => {
+      unsubscribe();
+      reject(new Error('La sincronizzazione non ha notificato la modifica entro 15 secondi'));
+    }, 15000);
+    unsubscribe = onSnapshot(ownerItem, snapshot => {
+      if (snapshot.data()?.checked === true) {
+        clearTimeout(timer);
+        unsubscribe();
+        resolve(true);
+      }
+    }, error => {
+      clearTimeout(timer);
+      unsubscribe();
+      reject(error);
+    });
+  });
+  await assertSucceeds(updateDoc(memberItem, {checked: true}));
+  await sawUpdate;
+  await assertSucceeds(setDoc(doc(member, 'groups', gid, 'wishlist', 'lake'), {
+    name: 'Lago', createdAt: serverTimestamp(), createdBy: 'member'
+  }));
+  const lake = await assertSucceeds(getDoc(doc(owner, 'groups', gid, 'wishlist', 'lake')));
+  assert.equal(lake.data().name, 'Lago');
+});
+
+test('membership falsa, email falsa e invito per gruppo sbagliato sono rifiutati', async () => {
+  await seedGroup('group-a');
+  await seedGroup('group-b');
+  const owner = dbFor('owner');
+  const member = dbFor('member');
+  const code = 'BCDEFGHJKLMNPQRS';
+  await assertSucceeds(setDoc(doc(owner, 'invites', code), {
+    groupId: 'group-a', createdBy: 'owner', createdAt: serverTimestamp(), expiresAt: future()
+  }));
+  await assertFails(setDoc(doc(member, 'groups', 'group-a', 'members', 'member'), {
+    uid: 'member', email: 'member@example.com', role: 'owner', joinedAt: serverTimestamp()
+  }));
+  await assertFails(setDoc(doc(member, 'groups', 'group-a', 'members', 'member'), {
+    uid: 'member', email: 'other@example.com', role: 'member',
+    inviteCode: code, joinedAt: serverTimestamp()
+  }));
+  await assertFails(setDoc(doc(member, 'groups', 'group-b', 'members', 'member'), {
+    uid: 'member', email: 'member@example.com', role: 'member',
+    inviteCode: code, joinedAt: serverTimestamp()
+  }));
+});
+
+test('membro puo cambiare nome gruppo ma non proprietario o membership', async () => {
+  await seedGroup('rename-group');
+  await env.withSecurityRulesDisabled(async context => {
+    await setDoc(doc(context.firestore(), 'groups', 'rename-group', 'members', 'member'), {
+      uid: 'member', email: 'member@example.com', role: 'member',
+      inviteCode: 'ABCDEFGHJKLMNPQR', joinedAt: Timestamp.now()
+    });
+  });
+  const member = dbFor('member');
+  await assertSucceeds(updateDoc(doc(member, 'groups', 'rename-group'), {name: 'Nuovo nome'}));
+  await assertFails(updateDoc(doc(member, 'groups', 'rename-group'), {ownerUid: 'member'}));
+  await assertFails(updateDoc(doc(member, 'groups', 'rename-group', 'members', 'member'), {email: 'other@example.com'}));
 });
