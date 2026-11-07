@@ -1,12 +1,26 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, addDoc, collection, onSnapshot, updateDoc, deleteDoc, serverTimestamp, query, orderBy, getDocs, writeBatch, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+import { getAuth, connectAuthEmulator, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+import { getFirestore, connectFirestoreEmulator, doc, getDoc, setDoc, addDoc, collection, onSnapshot, updateDoc, deleteDoc, serverTimestamp, query, orderBy, getDocs, writeBatch, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
 
 const $ = id => document.getElementById(id);
-const app = initializeApp(firebaseConfig);
+// Solo localhost con ?emulator=1: progetto fittizio, nessun accesso a Firebase reale.
+const useLocalEmulators =
+  (location.hostname === "127.0.0.1" || location.hostname === "localhost") &&
+  new URLSearchParams(location.search).get("emulator") === "1";
+const emulatorConfig = {
+  apiKey: "demo-api-key",
+  authDomain: "demo-camperapp-security.firebaseapp.com",
+  projectId: "demo-camperapp-security",
+  appId: "1:123456789012:web:demo"
+};
+const app = initializeApp(useLocalEmulators ? emulatorConfig : firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+if (useLocalEmulators) {
+  connectAuthEmulator(auth, "http://127.0.0.1:9099", {disableWarnings: true});
+  connectFirestoreEmulator(db, "127.0.0.1", 8080);
+}
 let currentUser = null, groupId = null, unsubShopping = null, unsubWishlist = null, unsubGroup = null;
 let shoppingCache = [], wishlistCache = [];
 const show = (id, yes=true) => $(id).classList.toggle("hidden", !yes);
