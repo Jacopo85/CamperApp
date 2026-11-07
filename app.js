@@ -1,12 +1,26 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, addDoc, collection, onSnapshot, updateDoc, deleteDoc, serverTimestamp, query, orderBy, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+import { getAuth, connectAuthEmulator, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+import { getFirestore, connectFirestoreEmulator, doc, getDoc, setDoc, addDoc, collection, onSnapshot, updateDoc, deleteDoc, serverTimestamp, query, orderBy, getDocs, writeBatch, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
 
 const $ = id => document.getElementById(id);
-const app = initializeApp(firebaseConfig);
+// Solo localhost con ?emulator=1: progetto fittizio, nessun accesso a Firebase reale.
+const useLocalEmulators =
+  (location.hostname === "127.0.0.1" || location.hostname === "localhost") &&
+  new URLSearchParams(location.search).get("emulator") === "1";
+const emulatorConfig = {
+  apiKey: "demo-api-key",
+  authDomain: "demo-camperapp-security.firebaseapp.com",
+  projectId: "demo-camperapp-security",
+  appId: "1:123456789012:web:demo"
+};
+const app = initializeApp(useLocalEmulators ? emulatorConfig : firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+if (useLocalEmulators) {
+  connectAuthEmulator(auth, "http://127.0.0.1:9099", {disableWarnings: true});
+  connectFirestoreEmulator(db, "127.0.0.1", 8080);
+}
 let currentUser = null, groupId = null, unsubShopping = null, unsubWishlist = null, unsubGroup = null;
 let shoppingCache = [], wishlistCache = [];
 const show = (id, yes=true) => $(id).classList.toggle("hidden", !yes);
@@ -19,13 +33,18 @@ function escapeHTML(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","
 function groupRef(){return doc(db,"groups",groupId);}
 function colRef(name){return collection(db,"groups",groupId,name);}
 function cleanup(){[unsubShopping,unsubWishlist,unsubGroup].forEach(fn=>{if(fn)fn();});unsubShopping=unsubWishlist=unsubGroup=null;groupId=null;shoppingCache=[];wishlistCache=[];}
-function inviteCode(){const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let out="";for(let i=0;i<12;i++)out+=chars[Math.floor(Math.random()*chars.length)];return out;}
+function inviteCode(){
+  const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const bytes=new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes,b=>chars[b % chars.length]).join("");
+}
 function randomGroupId(){return crypto.randomUUID().replaceAll("-","").slice(0,24);}
 async function loadGroup(gid){
   cleanup(); groupId=gid;
   const ref=doc(db,"groups",gid); const snap=await getDoc(ref);
   if(!snap.exists()) throw new Error("Il gruppo non esiste più.");
-  setView("appView"); $("userLabel").textContent=currentUser.email||"Account"; $("groupTitle").textContent=snap.data().name||"Il nostro camper"; setSync("Sincronizzazione attiva");
+  setView("appView"); show("ownerInvitePanel",snap.data().ownerUid===currentUser.uid); show("generatedInviteWrap",false); show("copyInviteBtn",false); $("generatedInviteCode").value=""; $("userLabel").textContent=currentUser.email||"Account"; $("groupTitle").textContent=snap.data().name||"Il nostro camper"; setSync("Sincronizzazione attiva");
   unsubGroup=onSnapshot(ref,s=>{if(s.exists())$("groupTitle").textContent=s.data().name||"Il nostro camper";});
   unsubShopping=onSnapshot(query(colRef("shopping"),orderBy("createdAt","asc")),snap=>{
     shoppingCache=snap.docs.map(d=>({id:d.id,...d.data()})); renderShopping(); updateSummaries();
@@ -72,21 +91,46 @@ $("logoutBtn").addEventListener("click",async()=>{cleanup();await signOut(auth);
 $("createGroupBtn").addEventListener("click",async()=>{
   try{
     msg("groupMessage","");const gid=randomGroupId(),code=inviteCode(),name=$("groupName").value.trim()||"Il nostro camper";
-    await setDoc(doc(db,"groups",gid),{name,ownerUid:currentUser.uid,createdAt:serverTimestamp()});
-    await setDoc(doc(db,"groups",gid,"members",currentUser.uid),{uid:currentUser.uid,email:currentUser.email,role:"owner",joinedAt:serverTimestamp()});
-    await setDoc(doc(db,"invites",code),{groupId:gid,createdBy:currentUser.uid,createdAt:serverTimestamp()});
-    await setDoc(doc(db,"users",currentUser.uid),{email:currentUser.email,groupId:gid,updatedAt:serverTimestamp()},{merge:true});
+    // Tutte le scritture devono riuscire insieme: niente gruppi orfani.
+    const batch=writeBatch(db);
+    batch.set(doc(db,"groups",gid),{name,ownerUid:currentUser.uid,createdAt:serverTimestamp()});
+    batch.set(doc(db,"groups",gid,"members",currentUser.uid),{uid:currentUser.uid,email:currentUser.email,role:"owner",joinedAt:serverTimestamp()});
+    batch.set(doc(db,"invites",code),{groupId:gid,createdBy:currentUser.uid,createdAt:serverTimestamp(),expiresAt:Timestamp.fromMillis(Date.now()+7*24*60*60*1000)});
+    batch.set(doc(db,"users",currentUser.uid),{email:currentUser.email,groupId:gid,updatedAt:serverTimestamp()},{merge:true});
+    await batch.commit();
     alert("Codice d'invito per il secondo account: "+code+"\nConservalo e inseriscilo dal secondo account.");
     await loadGroup(gid);
   }catch(e){msg("groupMessage",friendlyError(e));}
+});
+$("generateInviteBtn").addEventListener("click",async()=>{
+  try{
+    const group=await getDoc(groupRef());
+    if(!group.exists() || group.data().ownerUid!==currentUser.uid)throw new Error("Solo il proprietario può creare inviti.");
+    const code=inviteCode();
+    await setDoc(doc(db,"invites",code),{groupId,createdBy:currentUser.uid,createdAt:serverTimestamp(),expiresAt:Timestamp.fromMillis(Date.now()+7*24*60*60*1000)});
+    $("generatedInviteCode").value=code;
+    show("generatedInviteWrap",true);show("copyInviteBtn",true);
+    msg("generatedInviteStatus","Codice creato: scade dopo 7 giorni. Condividilo soltanto con l'altro account.");
+  }catch(e){msg("generatedInviteStatus",friendlyError(e));}
+});
+$("copyInviteBtn").addEventListener("click",async()=>{
+  const code=$("generatedInviteCode").value;
+  if(!code)return;
+  try{await navigator.clipboard.writeText(code);msg("generatedInviteStatus","Codice copiato.");}
+  catch(e){$("generatedInviteCode").select();msg("generatedInviteStatus","Seleziona e copia il codice manualmente.");}
 });
 $("joinGroupBtn").addEventListener("click",async()=>{
   try{
     msg("groupMessage","");const code=$("inviteCode").value.trim().toUpperCase();if(!code)throw new Error("Inserisci il codice d'invito.");
     const inv=await getDoc(doc(db,"invites",code));if(!inv.exists())throw new Error("Codice non valido.");
-    const gid=inv.data().groupId;
-    await setDoc(doc(db,"groups",gid,"members",currentUser.uid),{uid:currentUser.uid,email:currentUser.email,role:"member",inviteCode:code,joinedAt:serverTimestamp()});
-    await setDoc(doc(db,"users",currentUser.uid),{email:currentUser.email,groupId:gid,updatedAt:serverTimestamp()},{merge:true});
+    const invitation=inv.data();
+    if(!invitation.expiresAt || invitation.expiresAt.toMillis()<=Date.now())throw new Error("Invito scaduto: richiedi un nuovo codice al proprietario.");
+    const gid=invitation.groupId;
+    // Appartenenza e profilo sono aggiornati in modo atomico.
+    const batch=writeBatch(db);
+    batch.set(doc(db,"groups",gid,"members",currentUser.uid),{uid:currentUser.uid,email:currentUser.email,role:"member",inviteCode:code,joinedAt:serverTimestamp()});
+    batch.set(doc(db,"users",currentUser.uid),{email:currentUser.email,groupId:gid,updatedAt:serverTimestamp()},{merge:true});
+    await batch.commit();
     await loadGroup(gid);
   }catch(e){msg("groupMessage",friendlyError(e));}
 });
