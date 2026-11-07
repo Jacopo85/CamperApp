@@ -2,7 +2,7 @@ import {before, after, test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {initializeTestEnvironment, assertFails, assertSucceeds} from '@firebase/rules-unit-testing';
-import {doc, getDoc, setDoc, updateDoc, serverTimestamp, Timestamp, onSnapshot} from 'firebase/firestore';
+import {doc, getDoc, setDoc, updateDoc, serverTimestamp, Timestamp, onSnapshot, writeBatch} from 'firebase/firestore';
 
 let env;
 const rules = readFileSync(new URL('../firestore.rules', import.meta.url), 'utf8');
@@ -177,4 +177,75 @@ test('membro puo cambiare nome gruppo ma non proprietario o membership', async (
   await assertSucceeds(updateDoc(doc(member, 'groups', 'rename-group'), {name: 'Nuovo nome'}));
   await assertFails(updateDoc(doc(member, 'groups', 'rename-group'), {ownerUid: 'member'}));
   await assertFails(updateDoc(doc(member, 'groups', 'rename-group', 'members', 'member'), {email: 'other@example.com'}));
+});
+
+
+test('creazione atomica gruppo, proprietario, invito e profilo', async () => {
+  const owner = dbFor('atomic-owner');
+  const gid = 'atomic-new-group';
+  const code = 'EFGHJKLMNPQRSTUV';
+  const batch = writeBatch(owner);
+  batch.set(doc(owner, 'groups', gid), {
+    name: 'Camper test', ownerUid: 'atomic-owner', createdAt: serverTimestamp()
+  });
+  batch.set(doc(owner, 'groups', gid, 'members', 'atomic-owner'), {
+    uid: 'atomic-owner', email: 'atomic-owner@example.com', role: 'owner', joinedAt: serverTimestamp()
+  });
+  batch.set(doc(owner, 'invites', code), {
+    groupId: gid, createdBy: 'atomic-owner', createdAt: serverTimestamp(), expiresAt: future()
+  });
+  batch.set(doc(owner, 'users', 'atomic-owner'), {
+    email: 'atomic-owner@example.com', groupId: gid, updatedAt: serverTimestamp()
+  }, {merge: true});
+  await assertSucceeds(batch.commit());
+  assert.equal((await getDoc(doc(owner, 'groups', gid))).data().ownerUid, 'atomic-owner');
+  assert.equal((await getDoc(doc(owner, 'users', 'atomic-owner'))).data().groupId, gid);
+  assert.equal((await getDoc(doc(owner, 'invites', code))).data().groupId, gid);
+});
+
+test('creazione gruppo fallita non lascia documenti parziali', async () => {
+  const owner = dbFor('atomic-fail');
+  const gid = 'atomic-failed-group';
+  const batch = writeBatch(owner);
+  batch.set(doc(owner, 'groups', gid), {
+    name: 'Camper', ownerUid: 'atomic-fail', createdAt: serverTimestamp()
+  });
+  batch.set(doc(owner, 'groups', gid, 'members', 'atomic-fail'), {
+    uid: 'atomic-fail', email: 'atomic-fail@example.com', role: 'owner', joinedAt: serverTimestamp()
+  });
+  batch.set(doc(owner, 'invites', 'BAD12CHARABC'), {
+    groupId: gid, createdBy: 'atomic-fail', createdAt: serverTimestamp(), expiresAt: future()
+  });
+  batch.set(doc(owner, 'users', 'atomic-fail'), {
+    email: 'atomic-fail@example.com', groupId: gid, updatedAt: serverTimestamp()
+  });
+  await assertFails(batch.commit());
+  await env.withSecurityRulesDisabled(async context => {
+    const db = context.firestore();
+    assert.equal((await getDoc(doc(db, 'groups', gid))).exists(), false);
+    assert.equal((await getDoc(doc(db, 'groups', gid, 'members', 'atomic-fail'))).exists(), false);
+    assert.equal((await getDoc(doc(db, 'users', 'atomic-fail'))).exists(), false);
+  });
+});
+
+test('ingresso atomico con invito crea membro e profilo insieme', async () => {
+  const gid = 'atomic-join-group';
+  await seedGroup(gid, 'atomic-owner2');
+  const owner = dbFor('atomic-owner2');
+  const code = 'FGHJKLMNPQRSTUVW';
+  await assertSucceeds(setDoc(doc(owner, 'invites', code), {
+    groupId: gid, createdBy: 'atomic-owner2', createdAt: serverTimestamp(), expiresAt: future()
+  }));
+  const member = dbFor('atomic-member');
+  const batch = writeBatch(member);
+  batch.set(doc(member, 'groups', gid, 'members', 'atomic-member'), {
+    uid: 'atomic-member', email: 'atomic-member@example.com',
+    role: 'member', inviteCode: code, joinedAt: serverTimestamp()
+  });
+  batch.set(doc(member, 'users', 'atomic-member'), {
+    email: 'atomic-member@example.com', groupId: gid, updatedAt: serverTimestamp()
+  }, {merge: true});
+  await assertSucceeds(batch.commit());
+  assert.equal((await getDoc(doc(member, 'users', 'atomic-member'))).data().groupId, gid);
+  assert.equal((await getDoc(doc(member, 'groups', gid, 'members', 'atomic-member'))).data().role, 'member');
 });
