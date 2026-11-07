@@ -6,19 +6,32 @@ service cloud.firestore {
       return signedIn() &&
         exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid));
     }
+    function ownEmail() {
+      return signedIn() && request.resource.data.email == request.auth.token.email;
+    }
     match /users/{userId} {
       allow read: if signedIn() && request.auth.uid == userId;
       allow create, update: if signedIn() && request.auth.uid == userId
-        && request.resource.data.keys().hasOnly(['email','groupId','updatedAt']);
+        && request.resource.data.keys().hasOnly(['email','groupId','updatedAt'])
+        && request.resource.data.keys().hasAll(['email','groupId','updatedAt'])
+        && ownEmail()
+        && request.resource.data.groupId is string
+        && isMember(request.resource.data.groupId);
       allow delete: if false;
     }
     match /invites/{code} {
-      // Il codice è casuale e lungo; la lettura è necessaria per consentire l'ingresso.
       allow get: if signedIn();
       allow list: if false;
       allow create: if signedIn()
+        && code.matches('^[A-HJ-NP-Z2-9]{16}$')
+        && request.resource.data.keys().hasOnly(['groupId','createdBy','createdAt','expiresAt'])
+        && request.resource.data.keys().hasAll(['groupId','createdBy','createdAt','expiresAt'])
         && request.resource.data.createdBy == request.auth.uid
         && request.resource.data.groupId is string
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.expiresAt is timestamp
+        && request.resource.data.expiresAt > request.time
+        && request.resource.data.expiresAt <= request.time + duration.value(8, 'd')
         && exists(/databases/$(database)/documents/groups/$(request.resource.data.groupId))
         && get(/databases/$(database)/documents/groups/$(request.resource.data.groupId)).data.ownerUid == request.auth.uid;
       allow update, delete: if false;
@@ -27,21 +40,27 @@ service cloud.firestore {
       allow create: if signedIn() && request.resource.data.ownerUid == request.auth.uid;
       allow read: if isMember(groupId);
       allow update: if isMember(groupId)
-        && request.resource.data.ownerUid == resource.data.ownerUid;
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name']);
       allow delete: if false;
       match /members/{userId} {
         allow read: if isMember(groupId);
         allow create: if signedIn() && request.auth.uid == userId
+          && request.resource.data.uid == request.auth.uid
+          && ownEmail()
+          && request.resource.data.joinedAt == request.time
           && (
             (request.resource.data.role == 'owner'
+             && request.resource.data.keys().hasOnly(['uid','email','role','joinedAt'])
              && get(/databases/$(database)/documents/groups/$(groupId)).data.ownerUid == request.auth.uid)
             ||
             (request.resource.data.role == 'member'
+             && request.resource.data.keys().hasOnly(['uid','email','role','inviteCode','joinedAt'])
              && request.resource.data.inviteCode is string
-             && get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.groupId == groupId)
+             && exists(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode))
+             && get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.groupId == groupId
+             && get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.expiresAt > request.time)
           );
-        allow update: if signedIn() && request.auth.uid == userId && isMember(groupId)
-          && request.resource.data.uid == resource.data.uid;
+        allow update: if false;
         allow delete: if signedIn() && request.auth.uid == userId && resource.data.role != 'owner';
       }
       match /{subcollection}/{documentId} {

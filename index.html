@@ -51,6 +51,17 @@
         <span id="syncState" class="sync-pill">Non sincronizzato</span>
       </div>
 
+      <div id="ownerInvitePanel" class="notice hidden">
+        <strong>Invito al gruppo (solo proprietario)</strong>
+        <p class="small muted">Genera un nuovo codice valido 7 giorni. I vecchi codici privi di scadenza non funzioneranno dopo l'aggiornamento.</p>
+        <button type="button" id="generateInviteBtn" class="secondary compact">Genera nuovo codice</button>
+        <label id="generatedInviteWrap" class="hidden">Codice da condividere
+          <input id="generatedInviteCode" readonly autocomplete="off" aria-label="Codice d'invito da copiare">
+        </label>
+        <button type="button" id="copyInviteBtn" class="secondary compact hidden">Copia codice</button>
+        <p id="generatedInviteStatus" class="status" role="status"></p>
+      </div>
+
       <nav class="tabs" aria-label="Sezioni">
         <button class="tab active" data-tab="home">Home</button>
         <button class="tab" data-tab="shopping">Spesa</button>
