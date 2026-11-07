@@ -1,0 +1,56 @@
+name: Verify Commons candidate photo originals (no deploy)
+on:
+  pull_request:
+    paths:
+      - .github/workflows/commons-candidate-audit.yml
+  workflow_dispatch:
+jobs:
+  verify-originals:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download candidate originals and verify SHA-1 from Commons metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p commons-candidates
+          curl -fL --retry 3 --max-time 120 -A "CamperAppPhotoAudit/1.0 (educational open-source verification)" \
+            "https://commons.wikimedia.org/wiki/Special:Redirect/file/Brussels-Grand_Place.jpg" \
+            -o commons-candidates/belgio-grand-place-original.jpg
+          curl -fL --retry 3 --max-time 120 -A "CamperAppPhotoAudit/1.0 (educational open-source verification)" \
+            "https://commons.wikimedia.org/wiki/Special:Redirect/file/Landscape_-_Minsk_city_-_Belarus_-_11_august_2014_AD.JPG" \
+            -o commons-candidates/bielorussia-minsk-natura-original.jpg
+          python3 - <<'PY'
+          import hashlib, pathlib, json
+          root=pathlib.Path('commons-candidates')
+          records=[
+            ('Belgio','belgio-grand-place-original.jpg','b23a6acf1b98a988c9d884b1a4b5bbfca10bb870',152468,
+             'https://commons.wikimedia.org/wiki/File:Brussels-Grand_Place.jpg','Romaine','CC0 1.0'),
+            ('Bielorussia','bielorussia-minsk-natura-original.jpg','f00383dfb4012bb66092b4c02a51c8cb442722b5',2887421,
+             'https://commons.wikimedia.org/wiki/File:Landscape_-_Minsk_city_-_Belarus_-_11_august_2014_AD.JPG','Pracar','CC0 1.0')
+          ]
+          result=[]
+          for country,filename,expected_sha1,expected_size,url,author,license in records:
+            path=root/filename
+            data=path.read_bytes()
+            sha1=hashlib.sha1(data).hexdigest()
+            sha256=hashlib.sha256(data).hexdigest()
+            ok=sha1==expected_sha1 and len(data)==expected_size
+            result.append(dict(country=country,filename=filename,sha1=sha1,sha256=sha256,
+              bytes=len(data),expected_sha1=expected_sha1,expected_size=expected_size,
+              matches_published_original=ok,commons_page=url,author=author,license=license,
+              additional_rights_verified=False,approved_for_publication=False))
+            print(f"{country}: {len(data)} bytes SHA1={sha1} expected={expected_sha1} match={ok}")
+          (root/'original-verification.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
+          if not all(x['matches_published_original'] for x in result):
+            raise SystemExit('File non identici agli originali documentati: non distribuire')
+          PY
+      - name: Store candidate originals as private workflow artifact (not published to site)
+        uses: actions/upload-artifact@v4
+        with:
+          name: commons-photo-originals-verified
+          path: commons-candidates/
+          retention-days: 7
+          if-no-files-found: error
