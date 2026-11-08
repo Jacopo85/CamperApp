@@ -122,6 +122,39 @@ jobs:
           with open('AUDIT_COMMONS_REMOTO/METADATI_DETTAGLIO_6.json','w') as f:json.dump(metadata,f,ensure_ascii=False,indent=2)
           print('Diagnostica Lotto28:',len(results),'impronte remote e',len(metadata),'metadati; nessuna immagine caricata')
           PYCODE
+      - name: Lotto 29 - documentare la base dichiarata di 4 immagini Commons PD
+        shell: bash
+        run: |
+          python - <<'PYCODE'
+          import json,re,urllib.parse,urllib.request
+          cards=json.load(open('AUDIT_COMMONS_REMOTO/MANIFEST.json'))
+          names={'Friuli-Venezia Giulia','Moldavia','Paesi Bassi','Svezia'}
+          out=[]
+          for name,title,author,license_claim,pixel,w,h,sha1 in cards:
+              if name not in names:continue
+              t='File:'+urllib.parse.unquote(title).replace('_',' ')
+              q=urllib.parse.urlencode({'action':'query','titles':t,'prop':'revisions|imageinfo','rvprop':'ids|timestamp|content','rvslots':'main','rvlimit':1,'iiprop':'extmetadata','format':'json','formatversion':'2'})
+              req=urllib.request.Request('https://commons.wikimedia.org/w/api.php?'+q,headers={'User-Agent':'CamperApp-Photo-Audit/2026.11.08 (+https://github.com/Jacopo85/CamperApp)'})
+              with urllib.request.urlopen(req,timeout=30) as f:api=json.load(f)
+              page=api['query']['pages'][0]
+              revision=page['revisions'][0]
+              wikitext=revision['slots']['main']['content']
+              meta=page['imageinfo'][0].get('extmetadata',{})
+              license_templates=sorted(set(re.findall(r'\{\{\s*([Pp][Dd][^|}\n]{0,80}|[Cc][Cc]0[^|}\n]{0,80}|[Cc]reative [Cc]ommons [Zz]ero[^|}\n]{0,80})',wikitext)))
+              markers=[]
+              for term in ('{{PD','{{pd','{{CC0','{{cc0','Public domain','public domain','{{self'):
+                  at=wikitext.find(term)
+                  if at>=0:markers.append({'term':term,'context':wikitext[max(0,at-120):at+360]})
+              out.append({'territorio':name,'title':t,'page_url':'https://commons.wikimedia.org/wiki/'+urllib.parse.quote(t.replace(' ','_'),safe=':_()'),
+                 'revision_id':revision['revid'],'revision_timestamp':revision['timestamp'],
+                 'wikitext_pd_templates':license_templates,'wikitext_contexts':markers[:6],
+                 'commons_license_short_name':meta.get('LicenseShortName',{}).get('value',''),
+                 'commons_copyrighted':meta.get('Copyrighted',{}).get('value',''),
+                 'limitations':'Solo dichiarazioni Commons, NON prova indipendente di titolarita o diritti di terzi.'})
+          assert len(out)==4,len(out)
+          with open('AUDIT_COMMONS_REMOTO/BASI_PD_DICHIARATE_4.json','w',encoding='utf8') as f:json.dump(out,f,indent=2,ensure_ascii=False)
+          print('Quattro basi PD documentate dai wikitext originali, non certificate giuridicamente')
+          PYCODE
       - name: Salvare rapporti anche in caso di errore
         if: always()
         uses: actions/upload-artifact@v4
@@ -133,5 +166,6 @@ jobs:
             AUDIT_COMMONS_REMOTO/DIAGNOSTICA_LICENZE.json
             AUDIT_COMMONS_REMOTO/IMPRONTE_REMOTE_15.csv
             AUDIT_COMMONS_REMOTO/METADATI_DETTAGLIO_6.json
+            AUDIT_COMMONS_REMOTO/BASI_PD_DICHIARATE_4.json
           if-no-files-found: warn
           retention-days: 30
