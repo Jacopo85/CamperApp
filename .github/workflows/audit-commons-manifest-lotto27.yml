@@ -27,22 +27,23 @@ jobs:
             --manifest AUDIT_COMMONS_REMOTO/MANIFEST.json \
             --output AUDIT_COMMONS_REMOTO \
             --timeout 25 --pause 0.4
-      - name: Diagnostica campionaria API Commons (nessun permesso di pubblicazione)
+      - name: Diagnosticare metadati licenza non coincidenti
         shell: bash
         run: |
-          python - <<'PY'
-          import json,urllib.parse,urllib.request
-          cards=json.load(open('AUDIT_COMMONS_REMOTO/MANIFEST.json'))
+          python - <<'PYCODE'
+          import csv,json,urllib.parse,urllib.request
+          rows=list(csv.DictReader(open('AUDIT_COMMONS_REMOTO/ESITI_66.csv',encoding='utf-8-sig')))
           data=[]
-          for x in cards[:3]:
-              title='File:'+urllib.parse.unquote(x[1]).replace('_',' ')
-              q=urllib.parse.urlencode({'action':'query','titles':title,'prop':'imageinfo','iiprop':'url|sha1|size|extmetadata','iiurlwidth':x[5],'format':'json','formatversion':'2'})
+          for r in rows:
+              if r['license_match']=='SI':continue
+              title='File:'+urllib.parse.unquote(r['commons_page'].split('/wiki/File:',1)[-1]).replace('_',' ')
+              q=urllib.parse.urlencode({'action':'query','titles':title,'prop':'imageinfo','iiprop':'extmetadata','format':'json','formatversion':'2'})
               req=urllib.request.Request('https://commons.wikimedia.org/w/api.php?'+q,headers={'User-Agent':'CamperApp-Photo-Audit/2026.11.08 (+https://github.com/Jacopo85/CamperApp)'})
-              with urllib.request.urlopen(req,timeout=15) as f: api=json.load(f)
-              info=api['query']['pages'][0]['imageinfo'][0]
-              data.append({'name':x[0],'url':info.get('url'),'thumburl':info.get('thumburl'),'descriptionurl':info.get('descriptionurl'),'license':info.get('extmetadata',{}).get('LicenseShortName'),'licenseurl':info.get('extmetadata',{}).get('LicenseUrl'),'keys':list(info.keys())})
-          with open('AUDIT_COMMONS_REMOTO/DIAGNOSTICA_API.json','w') as f:json.dump(data,f,indent=2)
-          PY
+              with urllib.request.urlopen(req,timeout=15) as f:api=json.load(f)
+              meta=api['query']['pages'][0]['imageinfo'][0].get('extmetadata',{})
+              data.append({'territorio':r['territorio'],'short_name':meta.get('LicenseShortName',{}).get('value'),'license_url':meta.get('LicenseUrl',{}).get('value'),'artist':meta.get('Artist',{}).get('value','')[:250]})
+          with open('AUDIT_COMMONS_REMOTO/DIAGNOSTICA_LICENZE.json','w') as f:json.dump(data,f,indent=2,ensure_ascii=False)
+          PYCODE
       - name: Salvare rapporti anche in caso di errore
         if: always()
         uses: actions/upload-artifact@v4
@@ -51,6 +52,6 @@ jobs:
           path: |
             AUDIT_COMMONS_REMOTO/ESITI_66.csv
             AUDIT_COMMONS_REMOTO/RIEPILOGO.json
-            AUDIT_COMMONS_REMOTO/DIAGNOSTICA_API.json
+            AUDIT_COMMONS_REMOTO/DIAGNOSTICA_LICENZE.json
           if-no-files-found: warn
           retention-days: 30
