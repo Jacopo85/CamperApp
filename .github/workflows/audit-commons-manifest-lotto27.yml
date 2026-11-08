@@ -93,7 +93,7 @@ jobs:
                   med=statistics.median(fr[1:])
                   def h(bits):return f'{sum(int(bool(v))<<(63-i) for i,v in enumerate(bits)):016x}'
                   return im.size,{'phash':h([fr[0]>0]+[v>=med for v in fr[1:]]),'dhash':h([dh[y*9+x]>dh[y*9+x+1] for y in range(8) for x in range(8)]),'ahash':h([v>=sum(ah)/len(ah) for v in ah])}
-          names={'Bosnia ed Erzegovina','Finlandia','Islanda','Kosovo','Lettonia','Lituania','Macedonia del Nord','Moldavia','Montenegro','Norvegia','Polonia','Serbia','Svezia'}
+          names={'Bosnia ed Erzegovina','Estonia','Finlandia','Germania','Islanda','Kosovo','Lettonia','Lituania','Macedonia del Nord','Moldavia','Montenegro','Norvegia','Polonia','Serbia','Svezia'}
           metanames={'Friuli-Venezia Giulia','Liguria','Moldavia','Paesi Bassi','Spagna','Svezia'}
           manifest=json.load(open('AUDIT_COMMONS_REMOTO/MANIFEST.json'))
           results=[];metadata=[]
@@ -116,8 +116,8 @@ jobs:
                       row.update({'remote_dimensions':f'{size[0]}x{size[1]}',**dig})
               except Exception as e:row['error']=f'{type(e).__name__}: {str(e)[:160]}'
               if name in names:results.append(row)
-          if len(results)!=13 or len(metadata)!=6:raise ValueError('Numero casi diagnostici non corretto')
-          with open('AUDIT_COMMONS_REMOTO/IMPRONTE_REMOTE_13.csv','w',encoding='utf-8-sig',newline='') as f:
+          if len(results)!=15 or len(metadata)!=6:raise ValueError('Numero casi diagnostici non corretto')
+          with open('AUDIT_COMMONS_REMOTO/IMPRONTE_REMOTE_15.csv','w',encoding='utf-8-sig',newline='') as f:
               wr=csv.DictWriter(f,fieldnames=list(results[0]));wr.writeheader();wr.writerows(results)
           with open('AUDIT_COMMONS_REMOTO/METADATI_DETTAGLIO_6.json','w') as f:json.dump(metadata,f,ensure_ascii=False,indent=2)
           print('Diagnostica Lotto28:',len(results),'impronte remote e',len(metadata),'metadati; nessuna immagine caricata')
@@ -131,7 +131,7 @@ jobs:
             AUDIT_COMMONS_REMOTO/ESITI_66.csv
             AUDIT_COMMONS_REMOTO/RIEPILOGO.json
             AUDIT_COMMONS_REMOTO/DIAGNOSTICA_LICENZE.json
-            AUDIT_COMMONS_REMOTO/IMPRONTE_REMOTE_13.csv
+            AUDIT_COMMONS_REMOTO/IMPRONTE_REMOTE_15.csv
             AUDIT_COMMONS_REMOTO/METADATI_DETTAGLIO_6.json
           if-no-files-found: warn
           retention-days: 30
