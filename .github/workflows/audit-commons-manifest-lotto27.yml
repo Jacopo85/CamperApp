@@ -21,6 +21,22 @@ jobs:
           base64 --decode audit/worker_lotto27.py.gz.b64 | gzip -d > tools/audit_commons_manifest_lotto27.py
           base64 --decode audit/manifest_lotto27.json.gz.b64 | gzip -d > AUDIT_COMMONS_REMOTO/MANIFEST.json
           python -m pip install 'Pillow>=11,<13'
+      - name: Lotto 28 - applicare due crediti corretti dai metadati Commons
+        shell: bash
+        run: |
+          python - <<'PYCODE'
+          import json
+          path='AUDIT_COMMONS_REMOTO/MANIFEST.json'
+          cards=json.load(open(path,encoding='utf-8'))
+          fixes={'Liguria':('TA Gonsalves (Tagooty)','Timothy A. Gonsalves'),'Spagna':('Reda Kerbouche','Reda Kerbush')}
+          for card in cards:
+              if card[0] in fixes:
+                  old,new=fixes[card[0]]
+                  assert card[2]==old,(card[0],card[2])
+                  card[2]=new
+          with open(path,'w',encoding='utf-8') as f:json.dump(cards,f,ensure_ascii=False)
+          print('Corrette due attribuzioni dichiarate per il solo audit remoto')
+          PYCODE
       - name: Verificare 66 foto senza caricare immagini locali nel repository
         run: |
           python tools/audit_commons_manifest_lotto27.py \
