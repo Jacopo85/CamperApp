@@ -1,0 +1,171 @@
+name: CamperApp - audit Commons remoto (Lotto 27, non pubblicare)
+on:
+  push:
+    branches:
+      - audit/commons-manifest-20261108
+permissions:
+  contents: read
+jobs:
+  commons-provenance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Preparare programma e manifest firmati dal ramo di audit
+        shell: bash
+        run: |
+          mkdir -p tools AUDIT_COMMONS_REMOTO
+          base64 --decode audit/worker_lotto27.py.gz.b64 | gzip -d > tools/audit_commons_manifest_lotto27.py
+          base64 --decode audit/manifest_lotto27.json.gz.b64 | gzip -d > AUDIT_COMMONS_REMOTO/MANIFEST.json
+          python -m pip install 'Pillow>=11,<13'
+      - name: Lotto 28 - applicare due crediti corretti dai metadati Commons
+        shell: bash
+        run: |
+          python - <<'PYCODE'
+          import json
+          path='AUDIT_COMMONS_REMOTO/MANIFEST.json'
+          cards=json.load(open(path,encoding='utf-8'))
+          fixes={'Liguria':('TA Gonsalves (Tagooty)','Timothy A. Gonsalves'),'Spagna':('Reda Kerbouche','Reda Kerbush')}
+          for card in cards:
+              if card[0] in fixes:
+                  old,new=fixes[card[0]]
+                  assert card[2]==old,(card[0],card[2])
+                  card[2]=new
+          with open(path,'w',encoding='utf-8') as f:json.dump(cards,f,ensure_ascii=False)
+          print('Corrette due attribuzioni dichiarate per il solo audit remoto')
+          PYCODE
+      - name: Verificare 66 foto senza caricare immagini locali nel repository
+        run: |
+          python tools/audit_commons_manifest_lotto27.py \
+            --manifest AUDIT_COMMONS_REMOTO/MANIFEST.json \
+            --output AUDIT_COMMONS_REMOTO \
+            --timeout 25 --pause 0.4
+      - name: Diagnosticare metadati licenza non coincidenti
+        shell: bash
+        run: |
+          python - <<'PYCODE'
+          import csv,json,urllib.parse,urllib.request
+          rows=list(csv.DictReader(open('AUDIT_COMMONS_REMOTO/ESITI_66.csv',encoding='utf-8-sig')))
+          data=[]
+          for r in rows:
+              if r['license_match']=='SI':continue
+              title='File:'+urllib.parse.unquote(r['commons_page'].split('/wiki/File:',1)[-1]).replace('_',' ')
+              q=urllib.parse.urlencode({'action':'query','titles':title,'prop':'imageinfo','iiprop':'extmetadata','format':'json','formatversion':'2'})
+              req=urllib.request.Request('https://commons.wikimedia.org/w/api.php?'+q,headers={'User-Agent':'CamperApp-Photo-Audit/2026.11.08 (+https://github.com/Jacopo85/CamperApp)'})
+              with urllib.request.urlopen(req,timeout=15) as f:api=json.load(f)
+              meta=api['query']['pages'][0]['imageinfo'][0].get('extmetadata',{})
+              data.append({'territorio':r['territorio'],'short_name':meta.get('LicenseShortName',{}).get('value'),'license_url':meta.get('LicenseUrl',{}).get('value'),'artist':meta.get('Artist',{}).get('value','')[:250]})
+          with open('AUDIT_COMMONS_REMOTO/DIAGNOSTICA_LICENZE.json','w') as f:json.dump(data,f,indent=2,ensure_ascii=False)
+          PYCODE
+      - name: Lotto 28 - impronte percettive remote e metadati di 6 casi
+        shell: bash
+        run: |
+          python - <<'PYCODE'
+          import csv,html,json,math,statistics,urllib.parse,urllib.request
+          from html.parser import HTMLParser
+          from io import BytesIO
+          from PIL import Image,ImageOps
+          class Plain(HTMLParser):
+              def __init__(self):super().__init__();self.parts=[]
+              def handle_data(self,s):self.parts.append(s)
+          def plain(s):
+              p=Plain();p.feed(str(s or ''));return ' '.join(html.unescape(' '.join(p.parts)).split())
+          def fetch(url):
+              req=urllib.request.Request(url,headers={'User-Agent':'CamperApp-Photo-Audit/2026.11.08 (+https://github.com/Jacopo85/CamperApp)'})
+              with urllib.request.urlopen(req,timeout=25) as r:
+                  if urllib.parse.urlparse(r.geturl()).hostname not in ('commons.wikimedia.org','upload.wikimedia.org','thumb.wikimedia.org'):raise ValueError('redirect non consentito')
+                  b=r.read(16000001)
+                  if len(b)>16000000 or not b:raise ValueError('Risposta non valida')
+                  return b
+          def hashes(payload):
+              with Image.open(BytesIO(payload)) as im:
+                  im=ImageOps.exif_transpose(im).convert('RGB')
+                  gray=im.convert('L')
+                  ah=list(gray.resize((8,8),Image.Resampling.LANCZOS).tobytes())
+                  dh=list(gray.resize((9,8),Image.Resampling.LANCZOS).tobytes())
+                  px=list(gray.resize((32,32),Image.Resampling.LANCZOS).tobytes())
+                  cs=[[math.cos(math.pi*(2*i+1)*k/64) for i in range(32)] for k in range(8)]
+                  tmp=[[sum(px[y*32+x]*cs[k][x] for x in range(32)) for k in range(8)] for y in range(32)]
+                  fr=[sum(tmp[y][u]*cs[v][y] for y in range(32)) for v in range(8) for u in range(8)]
+                  med=statistics.median(fr[1:])
+                  def h(bits):return f'{sum(int(bool(v))<<(63-i) for i,v in enumerate(bits)):016x}'
+                  return im.size,{'phash':h([fr[0]>0]+[v>=med for v in fr[1:]]),'dhash':h([dh[y*9+x]>dh[y*9+x+1] for y in range(8) for x in range(8)]),'ahash':h([v>=sum(ah)/len(ah) for v in ah])}
+          names={'Bosnia ed Erzegovina','Estonia','Finlandia','Germania','Islanda','Kosovo','Lettonia','Lituania','Macedonia del Nord','Moldavia','Montenegro','Norvegia','Polonia','Serbia','Svezia'}
+          metanames={'Friuli-Venezia Giulia','Liguria','Moldavia','Paesi Bassi','Spagna','Svezia'}
+          manifest=json.load(open('AUDIT_COMMONS_REMOTO/MANIFEST.json'))
+          results=[];metadata=[]
+          for name,title,author,license_claim,pixel,w,h,sha1 in manifest:
+              if name not in names and name not in metanames:continue
+              row={'territorio':name,'remote_dimensions':'','phash':'','dhash':'','ahash':'','original_sha1':'','error':''}
+              try:
+                  t='File:'+urllib.parse.unquote(title).replace('_',' ')
+                  q=urllib.parse.urlencode({'action':'query','titles':t,'prop':'imageinfo','iiprop':'url|sha1|extmetadata','iiurlwidth':w,'format':'json','formatversion':'2'})
+                  info=json.loads(fetch('https://commons.wikimedia.org/w/api.php?'+q))['query']['pages'][0]['imageinfo'][0]
+                  row['original_sha1']=info.get('sha1','')
+                  if name in metanames:
+                      m=info.get('extmetadata',{})
+                      metadata.append({'territorio':name,'autore_dichiarato':author,'licenza_dichiarata':license_claim,
+                        'metadata':{k:plain(v.get('value',''))[:1000] for k,v in m.items() if k in ('Artist','LicenseShortName','LicenseUrl','Copyrighted','UsageTerms','Restrictions','Permission','Credit','Attribution','License','AttributionRequired')}})
+                  if name in names:
+                      url=info.get('thumburl') or info.get('url')
+                      if urllib.parse.urlparse(url).hostname not in ('thumb.wikimedia.org','upload.wikimedia.org'):raise ValueError('Host anteprima non valido')
+                      size,dig=hashes(fetch(url))
+                      row.update({'remote_dimensions':f'{size[0]}x{size[1]}',**dig})
+              except Exception as e:row['error']=f'{type(e).__name__}: {str(e)[:160]}'
+              if name in names:results.append(row)
+          if len(results)!=15 or len(metadata)!=6:raise ValueError('Numero casi diagnostici non corretto')
+          with open('AUDIT_COMMONS_REMOTO/IMPRONTE_REMOTE_15.csv','w',encoding='utf-8-sig',newline='') as f:
+              wr=csv.DictWriter(f,fieldnames=list(results[0]));wr.writeheader();wr.writerows(results)
+          with open('AUDIT_COMMONS_REMOTO/METADATI_DETTAGLIO_6.json','w') as f:json.dump(metadata,f,ensure_ascii=False,indent=2)
+          print('Diagnostica Lotto28:',len(results),'impronte remote e',len(metadata),'metadati; nessuna immagine caricata')
+          PYCODE
+      - name: Lotto 29 - documentare la base dichiarata di 4 immagini Commons PD
+        shell: bash
+        run: |
+          python - <<'PYCODE'
+          import json,re,urllib.parse,urllib.request
+          cards=json.load(open('AUDIT_COMMONS_REMOTO/MANIFEST.json'))
+          names={'Friuli-Venezia Giulia','Moldavia','Paesi Bassi','Svezia'}
+          out=[]
+          for name,title,author,license_claim,pixel,w,h,sha1 in cards:
+              if name not in names:continue
+              t='File:'+urllib.parse.unquote(title).replace('_',' ')
+              q=urllib.parse.urlencode({'action':'query','titles':t,'prop':'revisions|imageinfo','rvprop':'ids|timestamp|content','rvslots':'main','rvlimit':1,'iiprop':'extmetadata','format':'json','formatversion':'2'})
+              req=urllib.request.Request('https://commons.wikimedia.org/w/api.php?'+q,headers={'User-Agent':'CamperApp-Photo-Audit/2026.11.08 (+https://github.com/Jacopo85/CamperApp)'})
+              with urllib.request.urlopen(req,timeout=30) as f:api=json.load(f)
+              page=api['query']['pages'][0]
+              revision=page['revisions'][0]
+              wikitext=revision['slots']['main']['content']
+              meta=page['imageinfo'][0].get('extmetadata',{})
+              license_templates=sorted(set(re.findall(r'\{\{\s*([Pp][Dd][^|}\n]{0,80}|[Cc][Cc]0[^|}\n]{0,80}|[Cc]reative [Cc]ommons [Zz]ero[^|}\n]{0,80})',wikitext)))
+              markers=[]
+              for term in ('{{PD','{{pd','{{CC0','{{cc0','Public domain','public domain','{{self'):
+                  at=wikitext.find(term)
+                  if at>=0:markers.append({'term':term,'context':wikitext[max(0,at-120):at+360]})
+              out.append({'territorio':name,'title':t,'page_url':'https://commons.wikimedia.org/wiki/'+urllib.parse.quote(t.replace(' ','_'),safe=':_()'),
+                 'revision_id':revision['revid'],'revision_timestamp':revision['timestamp'],
+                 'wikitext_pd_templates':license_templates,'wikitext_contexts':markers[:6],
+                 'commons_license_short_name':meta.get('LicenseShortName',{}).get('value',''),
+                 'commons_copyrighted':meta.get('Copyrighted',{}).get('value',''),
+                 'limitations':'Solo dichiarazioni Commons, NON prova indipendente di titolarita o diritti di terzi.'})
+          assert len(out)==4,len(out)
+          with open('AUDIT_COMMONS_REMOTO/BASI_PD_DICHIARATE_4.json','w',encoding='utf8') as f:json.dump(out,f,indent=2,ensure_ascii=False)
+          print('Quattro basi PD documentate dai wikitext originali, non certificate giuridicamente')
+          PYCODE
+      - name: Salvare rapporti anche in caso di errore
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: camperapp-commons-lotto27-non-pubblicare
+          path: |
+            AUDIT_COMMONS_REMOTO/ESITI_66.csv
+            AUDIT_COMMONS_REMOTO/RIEPILOGO.json
+            AUDIT_COMMONS_REMOTO/DIAGNOSTICA_LICENZE.json
+            AUDIT_COMMONS_REMOTO/IMPRONTE_REMOTE_15.csv
+            AUDIT_COMMONS_REMOTO/METADATI_DETTAGLIO_6.json
+            AUDIT_COMMONS_REMOTO/BASI_PD_DICHIARATE_4.json
+          if-no-files-found: warn
+          retention-days: 30
