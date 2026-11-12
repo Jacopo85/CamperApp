@@ -21,13 +21,34 @@ function refreshSyncState(){
   if(shoppingSync===true && wishlistSync===true){setSync("Dati sincronizzati");return;}
   setSync("Online · sincronizzazione in corso");
 }
-window.addEventListener("online",refreshSyncState);
+window.addEventListener("online",()=>{refreshSyncState();if(currentUser&&!groupId)void restoreCurrentGroup();});
 window.addEventListener("offline",refreshSyncState);
 function setView(view){ ["authView","groupView","appView"].forEach(id=>show(id,false)); show(view); }
 function switchTab(name){ document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===name)); document.querySelectorAll(".tab-panel").forEach(p=>p.classList.toggle("hidden",p.id!=="tab-"+name)); }
 function escapeHTML(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function groupRef(){return doc(db,"groups",groupId);}
 function colRef(name){return collection(db,"groups",groupId,name);}
+let restoreInProgress=false;
+async function restoreCurrentGroup(){
+  if(restoreInProgress||!currentUser)return;
+  if(!navigator.onLine){
+    setView("groupView");
+    msg("groupMessage","Sei offline: il gruppo familiare non è stato cancellato. Riconnettiti a Internet e attendi il recupero automatico. Non creare un nuovo gruppo.");
+    return;
+  }
+  restoreInProgress=true;
+  try{
+    const userDoc=await getDoc(doc(db,"users",currentUser.uid));
+    if(userDoc.exists()&&userDoc.data().groupId)await loadGroup(userDoc.data().groupId);
+    else setView("groupView");
+    msg("groupMessage","");
+  }catch(e){
+    setView("groupView");
+    msg("groupMessage",(!navigator.onLine||e?.code==="unavailable")
+      ?"Connessione assente: il gruppo esistente non è stato cancellato. Riconnettiti a Internet per riprovare. Non creare un nuovo gruppo."
+      :friendlyError(e));
+  }finally{restoreInProgress=false;}
+}
 function cleanup(){[unsubShopping,unsubWishlist,unsubGroup].forEach(fn=>{if(fn)fn();});unsubShopping=unsubWishlist=unsubGroup=null;groupId=null;shoppingCache=[];wishlistCache=[];authorNames=new Map();shoppingSync=wishlistSync=null;syncError=false;}
 // I nomi sono associati agli UID dei membri; non viene modificato Firestore.
 function memberDisplayName(email){
@@ -198,11 +219,7 @@ onAuthStateChanged(auth,async user=>{
   cleanup();currentUser=user;show("logoutBtn",!!user);
   if(!user){setView("authView");show("setupNotice",true);return;}
   show("setupNotice",false);$("userLabel").textContent=user.email||"Account";
-  try{
-    const userDoc=await getDoc(doc(db,"users",user.uid));
-    if(userDoc.exists()&&userDoc.data().groupId){await loadGroup(userDoc.data().groupId);}
-    else setView("groupView");
-  }catch(e){setView("groupView");msg("groupMessage",friendlyError(e));}
+  await restoreCurrentGroup();
 });
 function friendlyError(e){
   const code=e?.code||"";
