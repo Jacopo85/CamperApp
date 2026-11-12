@@ -9,6 +9,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 let currentUser = null, groupId = null, unsubShopping = null, unsubWishlist = null, unsubGroup = null;
 let shoppingCache = [], wishlistCache = [];
+let authorNames = new Map();
 const show = (id, yes=true) => $(id).classList.toggle("hidden", !yes);
 const msg = (id, text) => { $(id).textContent = text || ""; };
 function toast(text){ const t=$("toast"); t.textContent=text; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2600); }
@@ -18,7 +19,36 @@ function switchTab(name){ document.querySelectorAll(".tab").forEach(b=>b.classLi
 function escapeHTML(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function groupRef(){return doc(db,"groups",groupId);}
 function colRef(name){return collection(db,"groups",groupId,name);}
-function cleanup(){[unsubShopping,unsubWishlist,unsubGroup].forEach(fn=>{if(fn)fn();});unsubShopping=unsubWishlist=unsubGroup=null;groupId=null;shoppingCache=[];wishlistCache=[];}
+function cleanup(){[unsubShopping,unsubWishlist,unsubGroup].forEach(fn=>{if(fn)fn();});unsubShopping=unsubWishlist=unsubGroup=null;groupId=null;shoppingCache=[];wishlistCache=[];authorNames=new Map();}
+// I nomi sono associati agli UID dei membri; non viene modificato Firestore.
+function memberDisplayName(email){
+  const names={
+    "jacoporeggioli@libero.it":"Jacopo",
+    "azzurra.bellini@libero.it":"Azzurra",
+    "azzurra.bellini@gmail.com":"Camper"
+  };
+  return names[String(email||"").trim().toLowerCase()]||null;
+}
+function authorLabel(uid){
+  return typeof uid==="string" && authorNames.has(uid)
+    ? "Aggiunto da "+authorNames.get(uid)
+    : "Autore non disponibile";
+}
+async function loadAuthorNames(gid){
+  try{
+    const members=await getDocs(collection(db,"groups",gid,"members"));
+    const names=new Map();
+    members.forEach(member=>{
+      const name=memberDisplayName(member.data().email);
+      if(name)names.set(member.id,name);
+    });
+    if(groupId!==gid)return;
+    authorNames=names;
+    renderShopping();renderWishlist();
+  }catch(err){
+    console.warn("Nomi autori non disponibili:",err);
+  }
+}
 function inviteCode(){const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let out="";for(let i=0;i<12;i++)out+=chars[Math.floor(Math.random()*chars.length)];return out;}
 function randomGroupId(){return crypto.randomUUID().replaceAll("-","").slice(0,24);}
 async function loadGroup(gid){
@@ -27,6 +57,7 @@ async function loadGroup(gid){
   if(!snap.exists()) throw new Error("Il gruppo non esiste più.");
   setView("appView"); $("userLabel").textContent=currentUser.email||"Account"; $("groupTitle").textContent=snap.data().name||"Il nostro camper"; setSync("Sincronizzazione attiva");
   unsubGroup=onSnapshot(ref,s=>{if(s.exists())$("groupTitle").textContent=s.data().name||"Il nostro camper";});
+  void loadAuthorNames(gid);
   unsubShopping=onSnapshot(query(colRef("shopping"),orderBy("createdAt","asc")),snap=>{
     shoppingCache=snap.docs.map(d=>({id:d.id,...d.data()})); renderShopping(); updateSummaries();
   },err=>{setSync("Errore sincronizzazione");toast("Errore lista spesa: "+err.message);});
@@ -42,7 +73,7 @@ function renderShopping(){
   $("shoppingEmpty").classList.toggle("hidden",shoppingCache.length>0);
   for(const item of shoppingCache){
     const li=document.createElement("li");li.className="item-row"+(item.checked?" checked":"");
-    li.innerHTML=`<input type="checkbox" aria-label="Acquistato" ${item.checked?"checked":""}><div class="item-main"><div class="item-title">${escapeHTML(item.name)}</div><div class="item-meta">${escapeHTML(item.qty||"Quantità non indicata")} · ${escapeHTML(item.category||"Altro")}</div></div><div class="item-actions"><button class="icon-btn delete-btn">Elimina</button></div>`;
+    li.innerHTML=`<input type="checkbox" aria-label="Acquistato" ${item.checked?"checked":""}><div class="item-main"><div class="item-title">${escapeHTML(item.name)}</div><div class="item-meta">${escapeHTML(item.qty||"Quantità non indicata")} · ${escapeHTML(item.category||"Altro")}</div><div class="item-meta">${escapeHTML(authorLabel(item.createdBy))}</div></div><div class="item-actions"><button class="icon-btn delete-btn">Elimina</button></div>`;
     li.querySelector('input').addEventListener("change",async e=>{try{await updateDoc(doc(db,"groups",groupId,"shopping",item.id),{checked:e.target.checked,updatedAt:serverTimestamp(),updatedBy:currentUser.uid});}catch(err){toast("Non riesco a salvare la spunta: "+err.message);}});
     li.querySelector(".delete-btn").addEventListener("click",async()=>{if(confirm(`Eliminare “${item.name}”?`))try{await deleteDoc(doc(db,"groups",groupId,"shopping",item.id));toast("Articolo eliminato.");}catch(err){toast("Eliminazione non riuscita: "+err.message);}});
     ul.appendChild(li);
@@ -55,7 +86,7 @@ function renderWishlist(){
     const li=document.createElement("li");li.className="item-row";
     const q=place.address||place.name;
     const mapsUrl="https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q);
-    li.innerHTML=`<div class="item-main"><div class="item-title">${escapeHTML(place.name)}</div><div class="item-meta">${escapeHTML(place.address||"Località da definire")} · Priorità ${escapeHTML(place.priority||"media")}</div>${place.notes?`<p class="muted small">${escapeHTML(place.notes)}</p>`:""}<p><a href="${mapsUrl}" target="_blank" rel="noopener">Apri in Google Maps ↗</a></p></div><div class="item-actions"><button class="icon-btn delete-btn">Elimina</button></div>`;
+    li.innerHTML=`<div class="item-main"><div class="item-title">${escapeHTML(place.name)}</div><div class="item-meta">${escapeHTML(place.address||"Località da definire")} · Priorità ${escapeHTML(place.priority||"media")}</div><div class="item-meta">${escapeHTML(authorLabel(place.createdBy))}</div>${place.notes?`<p class="muted small">${escapeHTML(place.notes)}</p>`:""}<p><a href="${mapsUrl}" target="_blank" rel="noopener">Apri in Google Maps ↗</a></p></div><div class="item-actions"><button class="icon-btn delete-btn">Elimina</button></div>`;
     li.querySelector(".delete-btn").addEventListener("click",async()=>{if(confirm(`Eliminare la meta “${place.name}”?`))try{await deleteDoc(doc(db,"groups",groupId,"wishlist",place.id));toast("Meta eliminata.");}catch(err){toast("Eliminazione non riuscita: "+err.message);}});
     ul.appendChild(li);
   }
