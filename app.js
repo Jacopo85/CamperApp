@@ -13,13 +13,22 @@ let authorNames = new Map();
 const show = (id, yes=true) => $(id).classList.toggle("hidden", !yes);
 const msg = (id, text) => { $(id).textContent = text || ""; };
 function toast(text){ const t=$("toast"); t.textContent=text; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2600); }
+let shoppingSync=null, wishlistSync=null, syncError=false;
 function setSync(text){ $("syncState").textContent=text; }
+function refreshSyncState(){
+  if(!navigator.onLine){setSync("Offline · modifiche non garantite");return;}
+  if(syncError){setSync("Errore sincronizzazione");return;}
+  if(shoppingSync===true && wishlistSync===true){setSync("Dati sincronizzati");return;}
+  setSync("Online · sincronizzazione in corso");
+}
+window.addEventListener("online",refreshSyncState);
+window.addEventListener("offline",refreshSyncState);
 function setView(view){ ["authView","groupView","appView"].forEach(id=>show(id,false)); show(view); }
 function switchTab(name){ document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===name)); document.querySelectorAll(".tab-panel").forEach(p=>p.classList.toggle("hidden",p.id!=="tab-"+name)); }
 function escapeHTML(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function groupRef(){return doc(db,"groups",groupId);}
 function colRef(name){return collection(db,"groups",groupId,name);}
-function cleanup(){[unsubShopping,unsubWishlist,unsubGroup].forEach(fn=>{if(fn)fn();});unsubShopping=unsubWishlist=unsubGroup=null;groupId=null;shoppingCache=[];wishlistCache=[];authorNames=new Map();}
+function cleanup(){[unsubShopping,unsubWishlist,unsubGroup].forEach(fn=>{if(fn)fn();});unsubShopping=unsubWishlist=unsubGroup=null;groupId=null;shoppingCache=[];wishlistCache=[];authorNames=new Map();shoppingSync=wishlistSync=null;syncError=false;}
 // I nomi sono associati agli UID dei membri; non viene modificato Firestore.
 function memberDisplayName(email){
   const names={
@@ -55,15 +64,15 @@ async function loadGroup(gid){
   cleanup(); groupId=gid;
   const ref=doc(db,"groups",gid); const snap=await getDoc(ref);
   if(!snap.exists()) throw new Error("Il gruppo non esiste più.");
-  setView("appView"); $("userLabel").textContent=currentUser.email||"Account"; $("groupTitle").textContent=snap.data().name||"Il nostro camper"; setSync("Sincronizzazione attiva");
+  setView("appView"); $("userLabel").textContent=currentUser.email||"Account"; $("groupTitle").textContent=snap.data().name||"Il nostro camper"; refreshSyncState();
   unsubGroup=onSnapshot(ref,s=>{if(s.exists())$("groupTitle").textContent=s.data().name||"Il nostro camper";});
   void loadAuthorNames(gid);
-  unsubShopping=onSnapshot(query(colRef("shopping"),orderBy("createdAt","asc")),snap=>{
-    shoppingCache=snap.docs.map(d=>({id:d.id,...d.data()})); renderShopping(); updateSummaries();
-  },err=>{setSync("Errore sincronizzazione");toast("Errore lista spesa: "+err.message);});
-  unsubWishlist=onSnapshot(query(colRef("wishlist"),orderBy("createdAt","desc")),snap=>{
-    wishlistCache=snap.docs.map(d=>({id:d.id,...d.data()})); renderWishlist(); updateSummaries();
-  },err=>{setSync("Errore sincronizzazione");toast("Errore mete: "+err.message);});
+  unsubShopping=onSnapshot(query(colRef("shopping"),orderBy("createdAt","asc")),{includeMetadataChanges:true},snap=>{
+    shoppingCache=snap.docs.map(d=>({id:d.id,...d.data()})); shoppingSync=!snap.metadata.fromCache&&!snap.metadata.hasPendingWrites;refreshSyncState();renderShopping(); updateSummaries();
+  },err=>{syncError=true;refreshSyncState();toast("Errore lista spesa: "+err.message);});
+  unsubWishlist=onSnapshot(query(colRef("wishlist"),orderBy("createdAt","desc")),{includeMetadataChanges:true},snap=>{
+    wishlistCache=snap.docs.map(d=>({id:d.id,...d.data()})); wishlistSync=!snap.metadata.fromCache&&!snap.metadata.hasPendingWrites;refreshSyncState();renderWishlist(); updateSummaries();
+  },err=>{syncError=true;refreshSyncState();toast("Errore mete: "+err.message);});
   const vehicleSnap=await getDoc(doc(db,"groups",gid,"settings","vehicle"));
   if(vehicleSnap.exists()) fillVehicle(vehicleSnap.data());
   else await setDoc(doc(db,"groups",gid,"settings","vehicle"),{length:7.38,width:2.32,height:2.95,maxMassKg:3500,updatedAt:serverTimestamp()});
