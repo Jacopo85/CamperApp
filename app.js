@@ -275,6 +275,62 @@ function renderSavedPlaces(){
   });
 }
 
+
+// La bozza usa soltanto mete esistenti: nessun geocoding, distanza o durata inventati.
+function normalizePlanText(value){
+  return String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleLowerCase("it").trim();
+}
+function generateTripPlan(){
+  const area=$("planArea").value.trim();
+  const days=Number($("planDays").value);
+  const results=$("planResults");
+  const status=$("planMessage");
+  results.replaceChildren();
+  if(!area){status.textContent="Indica una zona o località da cercare tra le mete salvate.";return;}
+  if(!Number.isInteger(days)||days<1||days>14){status.textContent="Inserisci da 1 a 14 giorni.";return;}
+  const needle=normalizePlanText(area);
+  const ranked={alta:0,media:1,bassa:2};
+  const matching=wishlistCache
+    .filter(p=>normalizePlanText([p.name,p.address,p.notes].join(" ")).includes(needle))
+    .sort((x,y)=>(ranked[x.priority]??1)-(ranked[y.priority]??1));
+  if(!matching.length){
+    status.textContent="Nessuna meta salvata contiene «"+area+"». Aggiungi mete con la zona nella località o nelle note, oppure prova una ricerca più ampia.";
+    return;
+  }
+  const chosen=matching.slice(0,days);
+  status.textContent="Trovate "+matching.length+" mete compatibili per testo. Bozza di "+days+" giorni, con "+chosen.length+" giornate suggerite. Non è un percorso stradale ottimizzato.";
+  for(let i=0;i<days;i++){
+    const section=document.createElement("div");
+    section.className="route-plan-day";
+    const title=document.createElement("strong");
+    title.textContent="Giorno "+(i+1);
+    section.appendChild(title);
+    const place=chosen[i];
+    if(place){
+      const location=(place.address||place.name||"").trim();
+      const p=document.createElement("p");
+      p.textContent=place.name+(place.address?" — "+place.address:"")+" · priorità "+(place.priority||"media");
+      section.appendChild(p);
+      const select=document.createElement("button");
+      select.type="button";
+      select.className="secondary compact";
+      select.textContent="Usa come destinazione";
+      select.addEventListener("click",()=>{
+        $("routeDestination").value=location;
+        toast("Destinazione impostata. Controlla partenza e tappe.");
+      });
+      section.appendChild(select);
+    }else{
+      const p=document.createElement("p");
+      p.className="muted small";
+      p.textContent="Giornata libera: nessun'altra meta salvata corrisponde alla zona.";
+      section.appendChild(p);
+    }
+    results.appendChild(section);
+  }
+}
+$("planGenerateBtn").addEventListener("click",generateTripPlan);
+
 // Ricerca di strutture presso destinazione e tappe inserite.
 function routeSearchLocations(){
   const destination=$("routeDestination").value.trim();
