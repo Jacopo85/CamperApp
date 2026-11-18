@@ -121,11 +121,17 @@
           <button type="submit">Apri itinerario in Google Maps</button>
         </form>
         <div class="card route-stops-card">
+          <h3>Le mete salvate dalla famiglia</h3>
+          <p class="muted">Usa una meta come destinazione oppure aggiungila alle tappe. L'ordine delle tappe resta modificabile nel campo sopra.</p>
+          <div id="routeSavedPlaces" class="route-saved-places" aria-live="polite"></div>
+        </div>
+        <div class="card route-stops-card">
           <h3>Campeggi e aree sosta</h3>
           <p class="muted">Cerca strutture vicino alla destinazione o alle tappe del viaggio. I risultati si aprono in Google Maps: verifica direttamente disponibilità, accesso e dimensioni ammesse.</p>
           <div class="route-actions">
             <button id="searchCampgroundsBtn" type="button" class="secondary">🏕️ Cerca campeggi</button>
             <button id="searchStopoversBtn" type="button" class="secondary">🚐 Cerca aree sosta</button>
+            <button id="searchServicesBtn" type="button" class="secondary">💧 Cerca carico/scarico e WC</button>
           </div>
           <div id="routeStopSearches" class="route-search-list" aria-live="polite"></div>
           <p class="small muted">Le ricerche sono effettuate vicino ai luoghi indicati, non lungo un corridoio stradale calcolato. Controlla sempre distanza dalla strada, accessibilità e limiti del camper.</p>
