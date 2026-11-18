@@ -13,6 +13,25 @@ let authorNames = new Map();
 const show = (id, yes=true) => $(id).classList.toggle("hidden", !yes);
 const msg = (id, text) => { $(id).textContent = text || ""; };
 function toast(text){ const t=$("toast"); t.textContent=text; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2600); }
+
+function writeNotice(text){
+  const notice=$("writeState");
+  if(!notice)return; // Older cached HTML: do not interrupt the operation.
+  notice.textContent=text;
+  notice.classList.toggle("hidden",!text);
+}
+function canWrite(){
+  if(navigator.onLine)return true;
+  writeNotice("Salvataggio non avviato: sei offline. Riconnettiti e riprova; la modifica non è stata inviata.");
+  toast("Offline: operazione non avviata.");
+  return false;
+}
+function writeFailed(label,error){
+  writeNotice(label+" non riuscito: "+friendlyError(error)+" Controlla i dati e riprova.");
+  toast(label+" non riuscito.");
+}
+function writeSucceeded(label){writeNotice("");toast(label);}
+
 let shoppingSync=null, wishlistSync=null, vehicleSync=null, syncError=false;
 let vehicleDirty=false;
 function setSync(text){ $("syncState").textContent=text; }
@@ -113,8 +132,8 @@ function renderShopping(){
   for(const item of shoppingCache){
     const li=document.createElement("li");li.className="item-row"+(item.checked?" checked":"");
     li.innerHTML=`<input type="checkbox" aria-label="Acquistato" ${item.checked?"checked":""}><div class="item-main"><div class="item-title">${escapeHTML(item.name)}</div><div class="item-meta">${escapeHTML(item.qty||"Quantità non indicata")} · ${escapeHTML(item.category||"Altro")}</div><div class="item-meta">${escapeHTML(authorLabel(item.createdBy))}</div></div><div class="item-actions"><button class="icon-btn delete-btn">Elimina</button></div>`;
-    li.querySelector('input').addEventListener("change",async e=>{try{await updateDoc(doc(db,"groups",groupId,"shopping",item.id),{checked:e.target.checked,updatedAt:serverTimestamp(),updatedBy:currentUser.uid});}catch(err){toast("Non riesco a salvare la spunta: "+err.message);}});
-    li.querySelector(".delete-btn").addEventListener("click",async()=>{if(confirm(`Eliminare “${item.name}”?`))try{await deleteDoc(doc(db,"groups",groupId,"shopping",item.id));toast("Articolo eliminato.");}catch(err){toast("Eliminazione non riuscita: "+err.message);}});
+    li.querySelector('input').addEventListener("change",async e=>{if(!canWrite()){e.target.checked=!e.target.checked;return;}try{await updateDoc(doc(db,"groups",groupId,"shopping",item.id),{checked:e.target.checked,updatedAt:serverTimestamp(),updatedBy:currentUser.uid});}catch(err){e.target.checked=!e.target.checked;writeFailed("Spunta",err);}});
+    li.querySelector(".delete-btn").addEventListener("click",async()=>{if(confirm(`Eliminare “${item.name}”?`)&&canWrite())try{await deleteDoc(doc(db,"groups",groupId,"shopping",item.id));toast("Articolo eliminato.");}catch(err){writeFailed("Eliminazione articolo",err);}});
     ul.appendChild(li);
   }
 }
@@ -126,7 +145,7 @@ function renderWishlist(){
     const q=place.address||place.name;
     const mapsUrl="https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q);
     li.innerHTML=`<div class="item-main"><div class="item-title">${escapeHTML(place.name)}</div><div class="item-meta">${escapeHTML(place.address||"Località da definire")} · Priorità ${escapeHTML(place.priority||"media")}</div><div class="item-meta">${escapeHTML(authorLabel(place.createdBy))}</div>${place.notes?`<p class="muted small">${escapeHTML(place.notes)}</p>`:""}<p><a href="${mapsUrl}" target="_blank" rel="noopener">Apri in Google Maps ↗</a></p></div><div class="item-actions"><button class="icon-btn delete-btn">Elimina</button></div>`;
-    li.querySelector(".delete-btn").addEventListener("click",async()=>{if(confirm(`Eliminare la meta “${place.name}”?`))try{await deleteDoc(doc(db,"groups",groupId,"wishlist",place.id));toast("Meta eliminata.");}catch(err){toast("Eliminazione non riuscita: "+err.message);}});
+    li.querySelector(".delete-btn").addEventListener("click",async()=>{if(confirm(`Eliminare la meta “${place.name}”?`)&&canWrite())try{await deleteDoc(doc(db,"groups",groupId,"wishlist",place.id));toast("Meta eliminata.");}catch(err){writeFailed("Eliminazione meta",err);}});
     ul.appendChild(li);
   }
 }
@@ -161,18 +180,18 @@ $("joinGroupBtn").addEventListener("click",async()=>{
   }catch(e){msg("groupMessage",friendlyError(e));}
 });
 $("shoppingForm").addEventListener("submit",async e=>{
-  e.preventDefault();try{await addDoc(colRef("shopping"),{name:$("itemName").value.trim(),qty:$("itemQty").value.trim(),category:$("itemCategory").value,checked:false,createdAt:serverTimestamp(),createdBy:currentUser.uid,updatedAt:serverTimestamp(),updatedBy:currentUser.uid});$("itemName").value="";$("itemQty").value="";toast("Articolo aggiunto.");}catch(err){toast("Non riesco ad aggiungere l'articolo: "+err.message);}
+  e.preventDefault();if(!canWrite())return;try{await addDoc(colRef("shopping"),{name:$("itemName").value.trim(),qty:$("itemQty").value.trim(),category:$("itemCategory").value,checked:false,createdAt:serverTimestamp(),createdBy:currentUser.uid,updatedAt:serverTimestamp(),updatedBy:currentUser.uid});$("itemName").value="";$("itemQty").value="";writeSucceeded("Articolo aggiunto.");}catch(err){writeFailed("Aggiunta articolo",err);}
 });
 $("resetShoppingBtn").addEventListener("click",async()=>{
-  if(!confirm("Rimettere tutti gli articoli come non acquistati?"))return;
-  try{const batch=writeBatch(db);shoppingCache.filter(x=>x.checked).forEach(item=>batch.update(doc(db,"groups",groupId,"shopping",item.id),{checked:false,updatedAt:serverTimestamp(),updatedBy:currentUser.uid}));await batch.commit();toast("Spunte azzerate. Gli articoli restano nella lista.");}catch(err){toast("Reset non riuscito: "+err.message);}
+  if(!confirm("Rimettere tutti gli articoli come non acquistati?")||!canWrite())return;
+  try{const batch=writeBatch(db);shoppingCache.filter(x=>x.checked).forEach(item=>batch.update(doc(db,"groups",groupId,"shopping",item.id),{checked:false,updatedAt:serverTimestamp(),updatedBy:currentUser.uid}));await batch.commit();writeSucceeded("Spunte azzerate. Gli articoli restano nella lista.");}catch(err){writeFailed("Reset spunte",err);}
 });
 $("wishlistForm").addEventListener("submit",async e=>{
-  e.preventDefault();try{await addDoc(colRef("wishlist"),{name:$("placeName").value.trim(),address:$("placeAddress").value.trim(),priority:$("placePriority").value,notes:$("placeNotes").value.trim(),createdAt:serverTimestamp(),createdBy:currentUser.uid,updatedAt:serverTimestamp()});$("wishlistForm").reset();toast("Meta salvata.");}catch(err){toast("Non riesco a salvare la meta: "+err.message);}
+  e.preventDefault();if(!canWrite())return;try{await addDoc(colRef("wishlist"),{name:$("placeName").value.trim(),address:$("placeAddress").value.trim(),priority:$("placePriority").value,notes:$("placeNotes").value.trim(),createdAt:serverTimestamp(),createdBy:currentUser.uid,updatedAt:serverTimestamp()});$("wishlistForm").reset();writeSucceeded("Meta salvata.");}catch(err){writeFailed("Salvataggio meta",err);}
 });
 $("vehicleForm").addEventListener("input",()=>{vehicleDirty=true;});
 $("vehicleForm").addEventListener("submit",async e=>{
-  e.preventDefault();try{await setDoc(doc(db,"groups",groupId,"settings","vehicle"),{length:Number($("vehicleLength").value),width:Number($("vehicleWidth").value),height:Number($("vehicleHeight").value),maxMassKg:Number($("vehicleMass").value),updatedAt:serverTimestamp(),updatedBy:currentUser.uid});vehicleDirty=false;toast("Dati camper salvati.");}catch(err){toast("Salvataggio non riuscito: "+err.message);}
+  e.preventDefault();if(!canWrite())return;try{await setDoc(doc(db,"groups",groupId,"settings","vehicle"),{length:Number($("vehicleLength").value),width:Number($("vehicleWidth").value),height:Number($("vehicleHeight").value),maxMassKg:Number($("vehicleMass").value),updatedAt:serverTimestamp(),updatedBy:currentUser.uid});vehicleDirty=false;writeSucceeded("Dati camper salvati.");}catch(err){writeFailed("Salvataggio dati camper",err);}
 });
 
 // Itinerario: la posizione è richiesta solo quando l'utente tocca il pulsante.
