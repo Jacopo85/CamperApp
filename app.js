@@ -7,18 +7,19 @@ const $ = id => document.getElementById(id);
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-let currentUser = null, groupId = null, unsubShopping = null, unsubWishlist = null, unsubGroup = null;
+let currentUser = null, groupId = null, unsubShopping = null, unsubWishlist = null, unsubGroup = null, unsubVehicle = null;
 let shoppingCache = [], wishlistCache = [];
 let authorNames = new Map();
 const show = (id, yes=true) => $(id).classList.toggle("hidden", !yes);
 const msg = (id, text) => { $(id).textContent = text || ""; };
 function toast(text){ const t=$("toast"); t.textContent=text; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2600); }
-let shoppingSync=null, wishlistSync=null, syncError=false;
+let shoppingSync=null, wishlistSync=null, vehicleSync=null, syncError=false;
+let vehicleDirty=false;
 function setSync(text){ $("syncState").textContent=text; }
 function refreshSyncState(){
   if(!navigator.onLine){setSync("Offline · modifiche non garantite");return;}
   if(syncError){setSync("Errore sincronizzazione");return;}
-  if(shoppingSync===true && wishlistSync===true){setSync("Dati sincronizzati");return;}
+  if(shoppingSync===true && wishlistSync===true && vehicleSync===true){setSync("Dati sincronizzati");return;}
   setSync("Online · sincronizzazione in corso");
 }
 window.addEventListener("online",()=>{refreshSyncState();if(currentUser&&!groupId)void restoreCurrentGroup();});
@@ -53,7 +54,7 @@ async function restoreCurrentGroup(){
       :friendlyError(e));
   }finally{restoreInProgress=false;}
 }
-function cleanup(){[unsubShopping,unsubWishlist,unsubGroup].forEach(fn=>{if(fn)fn();});unsubShopping=unsubWishlist=unsubGroup=null;groupId=null;shoppingCache=[];wishlistCache=[];authorNames=new Map();shoppingSync=wishlistSync=null;syncError=false;}
+function cleanup(){[unsubShopping,unsubWishlist,unsubGroup,unsubVehicle].forEach(fn=>{if(fn)fn();});unsubShopping=unsubWishlist=unsubGroup=unsubVehicle=null;groupId=null;shoppingCache=[];wishlistCache=[];authorNames=new Map();shoppingSync=wishlistSync=vehicleSync=null;syncError=false;vehicleDirty=false;}
 // I nomi sono associati agli UID dei membri; non viene modificato Firestore.
 function memberDisplayName(email){
   const names={
@@ -98,9 +99,13 @@ async function loadGroup(gid){
   unsubWishlist=onSnapshot(query(colRef("wishlist"),orderBy("createdAt","desc")),{includeMetadataChanges:true},snap=>{
     wishlistCache=snap.docs.map(d=>({id:d.id,...d.data()})); wishlistSync=!snap.metadata.fromCache&&!snap.metadata.hasPendingWrites;refreshSyncState();renderWishlist(); updateSummaries();
   },err=>{syncError=true;refreshSyncState();toast("Errore mete: "+err.message);});
-  const vehicleSnap=await getDoc(doc(db,"groups",gid,"settings","vehicle"));
-  if(vehicleSnap.exists()) fillVehicle(vehicleSnap.data());
-  else await setDoc(doc(db,"groups",gid,"settings","vehicle"),{length:7.38,width:2.32,height:2.95,maxMassKg:3500,updatedAt:serverTimestamp()});
+  // Ricevi gli aggiornamenti dei dati camper dagli altri dispositivi.
+  unsubVehicle=onSnapshot(doc(db,"groups",gid,"settings","vehicle"),{includeMetadataChanges:true},snap=>{
+    vehicleSync=!snap.metadata.fromCache&&!snap.metadata.hasPendingWrites;
+    refreshSyncState();
+    if(snap.exists()&&!vehicleDirty)fillVehicle(snap.data());
+    // Non sovrascrivere un modulo con modifiche non ancora salvate.
+  },err=>{syncError=true;refreshSyncState();toast("Errore dati camper: "+err.message);});
 }
 function renderShopping(){
   const ul=$("shoppingList"); ul.innerHTML="";
@@ -165,8 +170,9 @@ $("resetShoppingBtn").addEventListener("click",async()=>{
 $("wishlistForm").addEventListener("submit",async e=>{
   e.preventDefault();try{await addDoc(colRef("wishlist"),{name:$("placeName").value.trim(),address:$("placeAddress").value.trim(),priority:$("placePriority").value,notes:$("placeNotes").value.trim(),createdAt:serverTimestamp(),createdBy:currentUser.uid,updatedAt:serverTimestamp()});$("wishlistForm").reset();toast("Meta salvata.");}catch(err){toast("Non riesco a salvare la meta: "+err.message);}
 });
+$("vehicleForm").addEventListener("input",()=>{vehicleDirty=true;});
 $("vehicleForm").addEventListener("submit",async e=>{
-  e.preventDefault();try{await setDoc(doc(db,"groups",groupId,"settings","vehicle"),{length:Number($("vehicleLength").value),width:Number($("vehicleWidth").value),height:Number($("vehicleHeight").value),maxMassKg:Number($("vehicleMass").value),updatedAt:serverTimestamp(),updatedBy:currentUser.uid});toast("Dati camper salvati.");}catch(err){toast("Salvataggio non riuscito: "+err.message);}
+  e.preventDefault();try{await setDoc(doc(db,"groups",groupId,"settings","vehicle"),{length:Number($("vehicleLength").value),width:Number($("vehicleWidth").value),height:Number($("vehicleHeight").value),maxMassKg:Number($("vehicleMass").value),updatedAt:serverTimestamp(),updatedBy:currentUser.uid});vehicleDirty=false;toast("Dati camper salvati.");}catch(err){toast("Salvataggio non riuscito: "+err.message);}
 });
 
 // Itinerario: la posizione è richiesta solo quando l'utente tocca il pulsante.
