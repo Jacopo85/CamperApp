@@ -16,6 +16,7 @@ function toast(text){ const t=$("toast"); t.textContent=text; t.classList.add("s
 
 function writeNotice(text){
   const notice=$("writeState");
+  if(!notice)return; // Older cached HTML: do not interrupt the operation.
   notice.textContent=text;
   notice.classList.toggle("hidden",!text);
 }
