@@ -121,6 +121,17 @@
           <button type="submit">Apri itinerario in Google Maps</button>
         </form>
         <div class="card route-stops-card">
+          <h3>Proposta di viaggio per zona e giorni</h3>
+          <p class="muted">Crea una bozza utilizzando le mete già salvate. Non calcola distanze o tempi di guida: verifica e riordina le giornate prima di partire.</p>
+          <div class="route-plan-controls">
+            <label>Zona o località<input id="planArea" type="text" maxlength="100" placeholder="Es. Toscana, Umbria, lago di Garda"></label>
+            <label>Numero di giorni<input id="planDays" type="number" min="1" max="14" value="3"></label>
+            <button id="planGenerateBtn" type="button" class="secondary">Prepara proposta</button>
+          </div>
+          <p id="planMessage" class="muted small" role="status"></p>
+          <div id="planResults" class="route-plan-results" aria-live="polite"></div>
+        </div>
+        <div class="card route-stops-card">
           <h3>Le mete salvate dalla famiglia</h3>
           <p class="muted">Usa una meta come destinazione oppure aggiungila alle tappe. L'ordine delle tappe resta modificabile nel campo sopra.</p>
           <div id="routeSavedPlaces" class="route-saved-places" aria-live="polite"></div>
