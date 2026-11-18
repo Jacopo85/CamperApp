@@ -116,7 +116,7 @@ async function loadGroup(gid){
     shoppingCache=snap.docs.map(d=>({id:d.id,...d.data()})); shoppingSync=!snap.metadata.fromCache&&!snap.metadata.hasPendingWrites;refreshSyncState();renderShopping(); updateSummaries();
   },err=>{syncError=true;refreshSyncState();toast("Errore lista spesa: "+err.message);});
   unsubWishlist=onSnapshot(query(colRef("wishlist"),orderBy("createdAt","desc")),{includeMetadataChanges:true},snap=>{
-    wishlistCache=snap.docs.map(d=>({id:d.id,...d.data()})); wishlistSync=!snap.metadata.fromCache&&!snap.metadata.hasPendingWrites;refreshSyncState();renderWishlist(); updateSummaries();
+    wishlistCache=snap.docs.map(d=>({id:d.id,...d.data()})); wishlistSync=!snap.metadata.fromCache&&!snap.metadata.hasPendingWrites;refreshSyncState();renderWishlist(); renderSavedPlaces(); updateSummaries();
   },err=>{syncError=true;refreshSyncState();toast("Errore mete: "+err.message);});
   // Ricevi gli aggiornamenti dei dati camper dagli altri dispositivi.
   unsubVehicle=onSnapshot(doc(db,"groups",gid,"settings","vehicle"),{includeMetadataChanges:true},snap=>{
@@ -218,7 +218,64 @@ $("itineraryForm").addEventListener("submit",e=>{
   window.open("https://www.google.com/maps/dir/?"+params.toString(),"_blank","noopener");
 });
 
-// Ricerca di campeggi e aree sosta presso destinazione e tappe inserite.
+
+// Le mete vengono lette dalla lista già sincronizzata; non si salvano copie o nuovi dati.
+function renderSavedPlaces(){
+  const container=$("routeSavedPlaces");
+  if(!container)return;
+  container.replaceChildren();
+  if(!wishlistCache.length){
+    const p=document.createElement("p");
+    p.className="muted small";
+    p.textContent="Nessuna meta salvata. Aggiungine una nella sezione Mete.";
+    container.appendChild(p);
+    return;
+  }
+  wishlistCache.forEach(place=>{
+    const row=document.createElement("div");
+    row.className="route-place-row";
+    const info=document.createElement("div");
+    info.className="route-place-info";
+    const title=document.createElement("strong");
+    title.textContent=place.name;
+    const detail=document.createElement("small");
+    detail.textContent=place.address||"Località non specificata";
+    info.append(title,detail);
+    const location=(place.address||place.name||"").trim();
+    const destinationBtn=document.createElement("button");
+    destinationBtn.type="button";
+    destinationBtn.className="secondary compact";
+    destinationBtn.textContent="Destinazione";
+    destinationBtn.disabled=!location;
+    destinationBtn.addEventListener("click",()=>{
+      $("routeDestination").value=location;
+      toast("Destinazione impostata.");
+    });
+    const stopBtn=document.createElement("button");
+    stopBtn.type="button";
+    stopBtn.className="secondary compact";
+    stopBtn.textContent="Aggiungi tappa";
+    stopBtn.disabled=!location;
+    stopBtn.addEventListener("click",()=>{
+      const field=$("routeWaypoints");
+      const places=field.value.split(";").map(p=>p.trim()).filter(Boolean);
+      if(places.some(p=>p.toLocaleLowerCase()===location.toLocaleLowerCase())){
+        toast("Tappa già presente.");
+        return;
+      }
+      places.push(location);
+      field.value=places.join("; ");
+      toast("Tappa aggiunta.");
+    });
+    const buttons=document.createElement("div");
+    buttons.className="route-place-buttons";
+    buttons.append(destinationBtn,stopBtn);
+    row.append(info,buttons);
+    container.appendChild(row);
+  });
+}
+
+// Ricerca di strutture presso destinazione e tappe inserite.
 function routeSearchLocations(){
   const destination=$("routeDestination").value.trim();
   const waypoints=$("routeWaypoints").value.split(";").map(x=>x.trim()).filter(Boolean);
@@ -227,7 +284,7 @@ function routeSearchLocations(){
 function openStopSearch(kind){
   const locations=routeSearchLocations();
   if(!locations.length){toast("Inserisci prima una destinazione o una tappa.");return;}
-  const label=kind==="campground"?"campeggi": "aree sosta camper";
+  const label=kind==="campground"?"campeggi":kind==="services"?"camper service carico scarico acque WC":"aree sosta camper";
   const list=$("routeStopSearches");
   list.replaceChildren();
   locations.forEach(place=>{
@@ -241,6 +298,7 @@ function openStopSearch(kind){
 }
 $("searchCampgroundsBtn").addEventListener("click",()=>openStopSearch("campground"));
 $("searchStopoversBtn").addEventListener("click",()=>openStopSearch("stopover"));
+$("searchServicesBtn").addEventListener("click",()=>openStopSearch("services"));
 
 document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.tab)));
 document.querySelectorAll("[data-goto]").forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.goto)));
