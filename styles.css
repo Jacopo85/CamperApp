@@ -16,3 +16,11 @@
 .route-place-info small{color:#65766f}
 .route-place-buttons{display:flex;gap:7px;flex-wrap:wrap}
 @media(max-width:520px){.route-place-buttons{width:100%}.route-place-buttons button{flex:1}}
+
+/* Bozza manuale per zona e numero di giorni */
+.route-plan-controls{display:grid;grid-template-columns:minmax(0,2fr) minmax(100px,1fr);gap:12px;align-items:end}
+.route-plan-controls button{grid-column:1/-1}
+.route-plan-results{display:grid;gap:10px;margin-top:10px}
+.route-plan-day{padding:12px;border:1px solid #d9dfdc;border-radius:10px}
+.route-plan-day p{margin:8px 0}
+@media(max-width:520px){.route-plan-controls{grid-template-columns:1fr}.route-plan-controls button{grid-column:auto}}
