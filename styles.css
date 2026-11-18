@@ -8,3 +8,11 @@
 
 /* Vademecum Europa */
 .guide-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;margin:14px 0}.guide-entry{text-align:left;white-space:normal;min-height:52px}.guide-detail{margin-top:18px}.guide-detail h4{margin-top:18px;margin-bottom:8px}.guide-detail p{line-height:1.55}
+
+/* Selezione delle mete condivise per la pianificazione */
+.route-saved-places{display:grid;gap:10px;margin-top:12px}
+.route-place-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px;border:1px solid #d9dfdc;border-radius:10px}
+.route-place-info{display:flex;flex-direction:column;gap:3px;min-width:130px;flex:1}
+.route-place-info small{color:#65766f}
+.route-place-buttons{display:flex;gap:7px;flex-wrap:wrap}
+@media(max-width:520px){.route-place-buttons{width:100%}.route-place-buttons button{flex:1}}
