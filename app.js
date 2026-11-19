@@ -315,6 +315,7 @@ function renderTripPlan(){
       add("↓",index===places.length-1,()=>{[places[index+1],places[index]]=[places[index],places[index+1]];renderTripPlan();});
       add("Giorno −",dayIndex===0,()=>{places.splice(index,1);plannedDays[dayIndex-1].push(place);renderTripPlan();});
       add("Giorno +",dayIndex===plannedDays.length-1,()=>{places.splice(index,1);plannedDays[dayIndex+1].push(place);renderTripPlan();});
+      add("Escludi",false,()=>{places.splice(index,1);renderTripPlan();});
       item.appendChild(controls);section.appendChild(item);
     });
     const locality=places.map(planPlaceLocation).find(Boolean);
