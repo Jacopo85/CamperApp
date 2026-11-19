@@ -24,3 +24,10 @@
 .route-plan-day{padding:12px;border:1px solid #d9dfdc;border-radius:10px}
 .route-plan-day p{margin:8px 0}
 @media(max-width:520px){.route-plan-controls{grid-template-columns:1fr}.route-plan-controls button{grid-column:auto}}
+
+/* Pianificazione flessibile */
+.route-plan-place{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:9px 0;border-bottom:1px solid #e1e7e4}
+.route-plan-place span{flex:1;min-width:140px}
+.route-plan-searches{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.route-plan-searches a{padding:7px 9px;border-radius:8px;background:#edf2ef;color:#305548;text-decoration:none;font-size:13px}
+#planApplyBtn{margin-top:12px}
