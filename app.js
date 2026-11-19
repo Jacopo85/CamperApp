@@ -280,56 +280,91 @@ function renderSavedPlaces(){
 function normalizePlanText(value){
   return String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleLowerCase("it").trim();
 }
+let plannedDays=[];
+function planPlaceLocation(place){return (place.address||place.name||"").trim();}
+function planSearchLink(label,place){
+  const a=document.createElement("a");
+  a.href="https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(label+" vicino a "+place);
+  a.target="_blank";a.rel="noopener";
+  a.textContent=label;
+  return a;
+}
+function renderTripPlan(){
+  const results=$("planResults");results.replaceChildren();
+  plannedDays.forEach((places,dayIndex)=>{
+    const section=document.createElement("section");section.className="route-plan-day";
+    const title=document.createElement("strong");title.textContent="Giorno "+(dayIndex+1);
+    section.appendChild(title);
+    if(!places.length){
+      const empty=document.createElement("p");empty.className="muted small";
+      empty.textContent="Giornata libera: puoi trasferire qui una meta da un altro giorno.";
+      section.appendChild(empty);
+    }
+    places.forEach((place,index)=>{
+      const item=document.createElement("div");item.className="route-plan-place";
+      const label=document.createElement("span");
+      label.textContent=place.name+(place.address?" — "+place.address:"");
+      item.appendChild(label);
+      const controls=document.createElement("div");controls.className="route-place-buttons";
+      const add=(caption,disabled,action)=>{
+        const button=document.createElement("button");button.type="button";
+        button.className="secondary compact";button.textContent=caption;button.disabled=disabled;
+        button.addEventListener("click",action);controls.appendChild(button);
+      };
+      add("↑",index===0,()=>{[places[index-1],places[index]]=[places[index],places[index-1]];renderTripPlan();});
+      add("↓",index===places.length-1,()=>{[places[index+1],places[index]]=[places[index],places[index+1]];renderTripPlan();});
+      add("Giorno −",dayIndex===0,()=>{places.splice(index,1);plannedDays[dayIndex-1].push(place);renderTripPlan();});
+      add("Giorno +",dayIndex===plannedDays.length-1,()=>{places.splice(index,1);plannedDays[dayIndex+1].push(place);renderTripPlan();});
+      add("Escludi",false,()=>{places.splice(index,1);renderTripPlan();});
+      item.appendChild(controls);section.appendChild(item);
+    });
+    const locality=places.map(planPlaceLocation).find(Boolean);
+    if(locality){
+      const searches=document.createElement("div");searches.className="route-plan-searches";
+      searches.append(
+        planSearchLink("🏕️ Campeggi",locality),
+        planSearchLink("🚐 Aree sosta",locality),
+        planSearchLink("💧 Carico/scarico e WC",locality)
+      );
+      section.appendChild(searches);
+    }
+    results.appendChild(section);
+  });
+  $("planApplyBtn").classList.toggle("hidden",!plannedDays.some(day=>day.length));
+}
 function generateTripPlan(){
   const area=$("planArea").value.trim();
   const days=Number($("planDays").value);
-  const results=$("planResults");
   const status=$("planMessage");
-  results.replaceChildren();
+  plannedDays=[];$("planResults").replaceChildren();$("planApplyBtn").classList.add("hidden");
   if(!area){status.textContent="Indica una zona o località da cercare tra le mete salvate.";return;}
   if(!Number.isInteger(days)||days<1||days>14){status.textContent="Inserisci da 1 a 14 giorni.";return;}
   const needle=normalizePlanText(area);
   const ranked={alta:0,media:1,bassa:2};
-  const matching=wishlistCache
+  const matches=wishlistCache
     .filter(p=>normalizePlanText([p.name,p.address,p.notes].join(" ")).includes(needle))
     .sort((x,y)=>(ranked[x.priority]??1)-(ranked[y.priority]??1));
-  if(!matching.length){
-    status.textContent="Nessuna meta salvata contiene «"+area+"». Aggiungi mete con la zona nella località o nelle note, oppure prova una ricerca più ampia.";
+  if(!matches.length){
+    status.textContent="Nessuna meta salvata contiene «"+area+"». Prova una zona diversa o aggiungi mete con località e note.";
     return;
   }
-  const chosen=matching.slice(0,days);
-  status.textContent="Trovate "+matching.length+" mete compatibili per testo. Bozza di "+days+" giorni, con "+chosen.length+" giornate suggerite. Non è un percorso stradale ottimizzato.";
-  for(let i=0;i<days;i++){
-    const section=document.createElement("div");
-    section.className="route-plan-day";
-    const title=document.createElement("strong");
-    title.textContent="Giorno "+(i+1);
-    section.appendChild(title);
-    const place=chosen[i];
-    if(place){
-      const location=(place.address||place.name||"").trim();
-      const p=document.createElement("p");
-      p.textContent=place.name+(place.address?" — "+place.address:"")+" · priorità "+(place.priority||"media");
-      section.appendChild(p);
-      const select=document.createElement("button");
-      select.type="button";
-      select.className="secondary compact";
-      select.textContent="Usa come destinazione";
-      select.addEventListener("click",()=>{
-        $("routeDestination").value=location;
-        toast("Destinazione impostata. Controlla partenza e tappe.");
-      });
-      section.appendChild(select);
-    }else{
-      const p=document.createElement("p");
-      p.className="muted small";
-      p.textContent="Giornata libera: nessun'altra meta salvata corrisponde alla zona.";
-      section.appendChild(p);
-    }
-    results.appendChild(section);
-  }
+  // Massimo due mete per giornata: è una distribuzione indicativa, non basata sulle distanze.
+  plannedDays=Array.from({length:days},()=>[]);
+  matches.slice(0,days*2).forEach((place,i)=>plannedDays[Math.floor(i/2)].push(place));
+  status.textContent="Trovate "+matches.length+" mete; inserite "+Math.min(matches.length,days*2)+" nella bozza. Sposta o riordina le mete: distanze e tempi non sono calcolati.";
+  renderTripPlan();
+}
+function applyTripPlan(){
+  const locations=plannedDays.flat().map(planPlaceLocation).filter(Boolean);
+  if(!locations.length){toast("Non ci sono mete nella proposta.");return;}
+  // Il trasferimento non apre automaticamente Google Maps e non modifica Firestore.
+  if(locations.length>10){toast("Troppe tappe per il percorso: riduci la proposta prima di applicarla.");return;}
+  $("routeDestination").value=locations[locations.length-1];
+  $("routeWaypoints").value=locations.slice(0,-1).join("; ");
+  toast("Tappe trasferite al percorso. Controlla la partenza e verifica l'ordine.");
 }
 $("planGenerateBtn").addEventListener("click",generateTripPlan);
+$("planApplyBtn").addEventListener("click",applyTripPlan);
 
 // Ricerca di strutture presso destinazione e tappe inserite.
 function routeSearchLocations(){
