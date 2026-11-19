@@ -122,10 +122,11 @@
         </form>
         <div class="card route-stops-card">
           <h3>Proposta di viaggio per zona e giorni</h3>
-          <p class="muted">Crea una bozza con fino a due mete salvate per giorno. Puoi riordinarle, spostarle tra giornate e cercare soste e servizi vicino alle mete. Non calcola distanze o tempi di guida.</p>
+          <p class="muted">Crea una bozza con fino a due mete per giorno. La ricerca privilegia la località indicata nell’indirizzo; le sole note sono facoltative. Puoi riordinare le mete e cercare servizi. Non è una verifica delle distanze geografiche o dei tempi di guida.</p>
           <div class="route-plan-controls">
             <label>Zona o località<input id="planArea" type="text" maxlength="100" placeholder="Es. Toscana, Umbria, lago di Garda"></label>
             <label>Numero di giorni<input id="planDays" type="number" min="1" max="14" value="3"></label>
+            <label class="route-plan-notes"><input id="planIncludeNotes" type="checkbox"> Includi anche le mete che citano la zona solo nelle note</label>
             <button id="planGenerateBtn" type="button" class="secondary">Prepara proposta</button>
           </div>
           <p id="planMessage" class="muted small" role="status"></p>
