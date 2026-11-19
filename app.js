@@ -341,9 +341,21 @@ function generateTripPlan(){
   if(!Number.isInteger(days)||days<1||days>14){status.textContent="Inserisci da 1 a 14 giorni.";return;}
   const needle=normalizePlanText(area);
   const ranked={alta:0,media:1,bassa:2};
+  // Prima le corrispondenze nella località, poi nel nome; le sole note sono facoltative.
+  const includeNotes=$("planIncludeNotes").checked;
+  function matchRank(place){
+    const address=normalizePlanText(place.address);
+    const name=normalizePlanText(place.name);
+    const notes=normalizePlanText(place.notes);
+    if(address.split(",").map(x=>x.trim()).includes(needle))return 0;
+    if(address.includes(needle))return 1;
+    if(name.includes(needle))return 2;
+    if(includeNotes&&notes.includes(needle))return 3;
+    return 99;
+  }
   const matches=wishlistCache
-    .filter(p=>normalizePlanText([p.name,p.address,p.notes].join(" ")).includes(needle))
-    .sort((x,y)=>(ranked[x.priority]??1)-(ranked[y.priority]??1));
+    .filter(p=>matchRank(p)<99)
+    .sort((x,y)=>matchRank(x)-matchRank(y)||(ranked[x.priority]??1)-(ranked[y.priority]??1));
   if(!matches.length){
     status.textContent="Nessuna meta salvata contiene «"+area+"». Prova una zona diversa o aggiungi mete con località e note.";
     return;
@@ -351,7 +363,7 @@ function generateTripPlan(){
   // Massimo due mete per giornata: è una distribuzione indicativa, non basata sulle distanze.
   plannedDays=Array.from({length:days},()=>[]);
   matches.slice(0,days*2).forEach((place,i)=>plannedDays[Math.floor(i/2)].push(place));
-  status.textContent="Trovate "+matches.length+" mete; inserite "+Math.min(matches.length,days*2)+" nella bozza. Sposta o riordina le mete: distanze e tempi non sono calcolati.";
+  status.textContent="Trovate "+matches.length+" mete, ordinate prima per località e poi per priorità; inserite "+Math.min(matches.length,days*2)+" nella bozza. La vicinanza geografica reale non è verificata: distanze e tempi non sono calcolati.";
   renderTripPlan();
 }
 function applyTripPlan(){
