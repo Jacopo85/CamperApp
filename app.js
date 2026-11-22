@@ -78,12 +78,11 @@ async function restoreCurrentGroup(){
 function cleanup(){stopNearbyMonitoring();[unsubShopping,unsubWishlist,unsubGroup,unsubVehicle].forEach(fn=>{if(fn)fn();});unsubShopping=unsubWishlist=unsubGroup=unsubVehicle=null;groupId=null;shoppingCache=[];wishlistCache=[];authorNames=new Map();shoppingSync=wishlistSync=vehicleSync=null;syncError=false;vehicleDirty=false;}
 // I nomi sono associati agli UID dei membri; non viene modificato Firestore.
 function memberDisplayName(email){
-  const names={
-    "jacoporeggioli@libero.it":"Jacopo",
-    "azzurra.bellini@libero.it":"Azzurra",
-    "azzurra.bellini@gmail.com":"Camper"
-  };
-  return names[String(email||"").trim().toLowerCase()]||null;
+  // Non pubblicare nel sorgente gli indirizzi email completi degli account familiari.
+  const [local="",domain=""]=String(email||"").trim().toLowerCase().split("@");
+  if(local.startsWith("jacopo"))return "Jacopo";
+  if(local.startsWith("azzurra"))return domain==="gmail.com"?"Camper":"Azzurra";
+  return null;
 }
 function authorLabel(uid){
   return typeof uid==="string" && authorNames.has(uid)
@@ -551,6 +550,7 @@ function applyTripPlan(){
   toast(locations.length>4?"Tappe trasferite: su Android apri ogni giornata separatamente.":"Tappe trasferite. Controlla partenza e ordine.");
 }
 $("planGenerateBtn").addEventListener("click",generateTripPlan);
+$("planStartDate").addEventListener("change",()=>{if(plannedDays.length)renderTripPlan();});
 $("planApplyBtn").addEventListener("click",applyTripPlan);
 
 // Ricerca di strutture presso destinazione e tappe inserite.
