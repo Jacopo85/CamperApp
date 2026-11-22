@@ -75,7 +75,7 @@ async function restoreCurrentGroup(){
       :friendlyError(e));
   }finally{restoreInProgress=false;}
 }
-function cleanup(){[unsubShopping,unsubWishlist,unsubGroup,unsubVehicle].forEach(fn=>{if(fn)fn();});unsubShopping=unsubWishlist=unsubGroup=unsubVehicle=null;groupId=null;shoppingCache=[];wishlistCache=[];authorNames=new Map();shoppingSync=wishlistSync=vehicleSync=null;syncError=false;vehicleDirty=false;}
+function cleanup(){stopNearbyMonitoring();[unsubShopping,unsubWishlist,unsubGroup,unsubVehicle].forEach(fn=>{if(fn)fn();});unsubShopping=unsubWishlist=unsubGroup=unsubVehicle=null;groupId=null;shoppingCache=[];wishlistCache=[];authorNames=new Map();shoppingSync=wishlistSync=vehicleSync=null;syncError=false;vehicleDirty=false;}
 // I nomi sono associati agli UID dei membri; non viene modificato Firestore.
 function memberDisplayName(email){
   const names={
@@ -194,6 +194,80 @@ function renderWishlist(){
     ul.appendChild(li);
   }
 }
+// Monitoraggio GPS volontario soltanto con CamperApp in primo piano.
+// Nessun invio di coordinate ad altri servizi e nessuna geolocalizzazione in background.
+let nearbyWatchId=null;
+let nearbySeen=new Set();
+function nearbyGpsCount(){return wishlistCache.filter(place=>gpsPoint(place)).length;}
+function updateNearbyState(){
+  const output=$("nearbyState");if(!output)return;
+  if(nearbyWatchId!==null){
+    output.textContent="Controllo GPS attivo mentre CamperApp è aperta · "+nearbyGpsCount()+" mete con coordinate.";
+  }else{
+    output.textContent="Avvisi disattivati · "+nearbyGpsCount()+" mete con coordinate GPS.";
+  }
+}
+function stopNearbyMonitoring(message){
+  if(nearbyWatchId!==null&&navigator.geolocation){
+    navigator.geolocation.clearWatch(nearbyWatchId);
+  }
+  nearbyWatchId=null;nearbySeen.clear();
+  const start=$("nearbyStart"),stop=$("nearbyStop"),status=$("nearbyState");
+  if(start)start.disabled=false;
+  if(stop)stop.disabled=true;
+  if(status)status.textContent=message||"Avvisi disattivati.";
+}
+function checkNearbyPosition(position){
+  if(document.visibilityState==="hidden")return;
+  const point={latitude:position.coords.latitude,longitude:position.coords.longitude};
+  if(!gpsPoint(point))return;
+  const radius=Number($("nearbyRadius").value);
+  const accuracy=Number(position.coords.accuracy)||0;
+  if(accuracy>radius*1000){
+    $("nearbyState").textContent="GPS troppo impreciso (±"+Math.round(accuracy)+" m). Non invio avvisi per evitare falsi allarmi.";
+    return;
+  }
+  const nearbyList=$("nearbyMatches");
+  const activeIds=new Set();
+  for(const place of wishlistCache){
+    const distance=gpsDistanceKm(point,place);
+    if(distance===null)continue;
+    if(distance<=radius){
+      activeIds.add(place.id);
+      if(!nearbySeen.has(place.id)){
+        nearbySeen.add(place.id);
+        const li=document.createElement("li");
+        li.textContent="📍 "+place.name+" a circa "+Math.round(distance*1000)+" metri (in linea d’aria)";
+        nearbyList.prepend(li);
+        while(nearbyList.children.length>6)nearbyList.lastChild.remove();
+        toast("Meta vicina: "+place.name);
+      }
+    }else if(distance>radius*1.5){
+      nearbySeen.delete(place.id);
+    }
+  }
+  $("nearbyState").textContent="GPS attivo · precisione ±"+Math.round(accuracy)+" m · mete nel raggio: "+activeIds.size+". Il monitoraggio può fermarsi se chiudi l’app.";
+}
+$("nearbyStart").addEventListener("click",()=>{
+  if(nearbyWatchId!==null)return;
+  if(!navigator.geolocation){$("nearbyState").textContent="GPS non disponibile sul dispositivo.";return;}
+  if(!nearbyGpsCount()){$("nearbyState").textContent="Aggiungi prima le coordinate GPS ad almeno una meta salvata.";return;}
+  nearbySeen.clear();$("nearbyMatches").replaceChildren();
+  $("nearbyStart").disabled=true;$("nearbyStop").disabled=false;
+  $("nearbyState").textContent="Richiesta autorizzazione alla posizione in corso…";
+  try{
+    nearbyWatchId=navigator.geolocation.watchPosition(
+      checkNearbyPosition,
+      error=>{
+        const label={1:"Permesso posizione negato",2:"Posizione non disponibile",3:"Ricerca posizione scaduta"}[error.code]||"Errore GPS";
+        stopNearbyMonitoring(label+". Puoi riprovare dalle impostazioni del dispositivo.");
+      },
+      {enableHighAccuracy:true,maximumAge:20000,timeout:20000}
+    );
+  }catch(error){stopNearbyMonitoring("Impossibile attivare il GPS: "+error.message);}
+});
+$("nearbyStop").addEventListener("click",()=>stopNearbyMonitoring("Monitoraggio GPS interrotto."));
+
 function updateSummaries(){
   const unchecked=shoppingCache.filter(x=>!x.checked).length;
   $("shoppingSummary").textContent=`${unchecked} articoli da acquistare`;
