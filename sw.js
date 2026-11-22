@@ -1,4 +1,4 @@
-const CACHE="camper-compagno-shell-v18";
+const CACHE="camper-compagno-shell-v19";
 const SHELL=["./","./index.html","./styles.css","./manifest.webmanifest","./guide.js","./vademecum-data.js","./norme-sosta.js","./norme-regionali.js","./route-geo.js","./deadline-utils.js","./deadlines-ui.js","./app.js"];
 const FRESH_FILES=new Set(["app.js","route-geo.js","deadline-utils.js","deadlines-ui.js","guide.js","vademecum-data.js","norme-sosta.js","norme-regionali.js","styles.css","index.html","manifest.webmanifest"]);
 
@@ -30,7 +30,10 @@ self.addEventListener("fetch",event=>{
         }
         return response;
       }catch{
-        return await caches.match(request)||Response.error();
+        // Offline: una URL con ?aggiorna=... deve mostrare la pagina già memorizzata.
+        // La cache dell'interfaccia non contiene dati Firestore o credenziali.
+        const cached=await caches.match(request,{ignoreSearch:request.mode==="navigate"});
+        return cached||(request.mode==="navigate"?await caches.match("./index.html"):null)||Response.error();
       }
     })());
     return;
