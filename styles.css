@@ -41,3 +41,6 @@
 .guide-details[open] summary{margin-bottom:12px}
 .guide-sources{padding-left:22px;overflow-wrap:anywhere}
 .guide-sources li{margin:7px 0}
+
+/* Ricerca manuale delle ordinanze locali, senza richieste API o dati Firebase */
+.guide-local-card{margin-top:14px}.guide-local-card .route-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.guide-local-card input{flex:1;min-width:190px;min-height:40px}
