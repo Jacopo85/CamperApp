@@ -41,5 +41,49 @@ export const normeSosta = {
     locali:"Controllare il Land, il Comune, i parchi e la segnaletica prima di fermarsi.",
     fonti:[{titolo:"ADAC – parcheggio dei Wohnmobil",url:"https://www.adac.de/verkehr/recht/verkehrsvorschriften-deutschland/wohnmobil-anwohner-parken/"},{titolo:"ADAC – campeggio e ripristino capacità di guida",url:"https://presse.adac.de/meldungen/adac-ev/verkehr/urlaub-mit-dem-reisemobil.html"}]
   }
+  ,"Svezia": {
+    stato:"Indicazioni ufficiali dell'agenzia ambientale verificate; regole di parcheggio e riserve locali da controllare",
+    ambito:"Naturvårdsverket: diritto di accesso alla natura e limiti per i veicoli a motore",
+    sosta:"Il diritto di accesso alla natura (allemansrätten) non comprende la circolazione né la sosta con camper fuori strada o sul terreno naturale. Sulle strade e nei parcheggi valgono regole stradali e segnaletica applicabili.",
+    notte:"Il diritto di pernottare in tenda nella natura non dà automaticamente il diritto di sostare o pernottare con un camper in un'area naturale. Verificare indicazioni del parcheggio e limiti locali.",
+    campeggio:"Non trattare il camper come una tenda ai fini dell'allemansrätten. La circolazione fuoristrada con veicoli motorizzati è generalmente vietata, anche solo per raggiungere una zona dove passare la notte.",
+    servizi:"Non è stata verificata una disciplina nazionale specifica per carico/scarico; utilizzare impianti autorizzati e controllare le prescrizioni del gestore.",
+    locali:"Verificare segnaletica delle aree di parcheggio, limiti temporali, riserve naturali, parchi nazionali e disposizioni comunali.",
+    verificatoIl:"22/11/2026",
+    fonti:[{titolo:"Naturvårdsverket – Husvagn, husbil och taktält i naturen",url:"https://www.naturvardsverket.se/amnesomraden/friluftsliv/motortrafik-i-naturen/husvagn-och-husbil-i-naturen/"}]
+  },
+  "Croazia": {
+    stato:"Divieto di campeggio nelle aree protette documentato da fonte governativa; altre norme ancora da verificare",
+    ambito:"Fonte ufficiale gov.hr sulle aree protette, non quadro completo del campeggio nazionale",
+    sosta:"Le norme generali sulla sosta stradale dei camper non sono state verificate in questa scheda. Controllare segnaletica, ordinanze comunali e regolamenti del parcheggio.",
+    notte:"Non è verificata un'autorizzazione generale al pernottamento nel camper fuori dalle strutture attrezzate.",
+    campeggio:"Nelle aree protette, il portale governativo indica il divieto di campeggiare salvo nelle zone appositamente designate e segnalate. La disciplina degli altri territori resta da approfondire.",
+    servizi:"Per acque chiare, grigie e nere utilizzare esclusivamente i punti di servizio autorizzati; le regole specifiche e la disponibilità devono essere controllate localmente.",
+    locali:"Verificare la categoria dell'area protetta, la disciplina dell'ente gestore, le ordinanze comunali e le regole del campeggio della località.",
+    verificatoIl:"22/11/2026",
+    fonti:[{titolo:"Portale governativo croato – Comportamento nelle aree protette",url:"https://gov.hr/en/manners-and-code-of-conduct-in-protected-areas/1582"}]
+  },
+  "Norvegia": {
+    stato:"Orientamento del portale turistico nazionale consultato; norme legali e locali da approfondire",
+    ambito:"Visit Norway, indicazioni pubbliche sul diritto di accesso alla natura (non testo legislativo)",
+    sosta:"Il diritto di accesso alla natura non conferisce libertà illimitata di parcheggiare camper o caravan ovunque. Rispettare i segnali, le strade e le aree di sosta autorizzate.",
+    notte:"Per dormire in camper occorre distinguere le possibilità di parcheggio dagli accessi consentiti ai campeggiatori a piedi. Nessuna autorizzazione generale al pernottamento è dedotta dalla fonte.",
+    campeggio:"Il diritto di campeggiare in aree naturali non comporta il diritto di raggiungerle o occuparle con un veicolo motorizzato. Preferire campeggi o aree per camper designate.",
+    servizi:"Le condizioni di scarico e rifornimento non sono verificate in questa scheda: utilizzare aree di servizio autorizzate e rispettare le istruzioni sul posto.",
+    locali:"Controllare restrizioni stagionali, aree protette e ordinanze locali, specialmente nelle zone molto visitate.",
+    verificatoIl:"22/11/2026",
+    fonti:[{titolo:"Visit Norway – The right to roam",url:"https://www.visitnorway.com/plan-your-trip/travel-tips-a-z/right-of-access/"}]
+  },
+  "Regno Unito": {
+    stato:"Indicazioni ufficiali specifiche su Inghilterra e Scozia consultate; quadro nazionale non omogeneo e da completare",
+    ambito:"Guide di enti pubblici: Lake District National Park, Highland Council e Scottish Outdoor Access",
+    sosta:"Non esiste in questa scheda un'autorizzazione generale valida per ogni territorio del Regno Unito. I divieti e le modalità di parcheggio dipendono dalla strada, dall'autorità competente e dall'area.",
+    notte:"Le possibilità di sosta notturna differiscono anche tra singoli parcheggi. Highland Council offre una rete di parcheggi designati per camper autosufficienti: l'esistenza di tali aree non autorizza pernottamenti ovunque.",
+    campeggio:"Il campeggio libero a piedi ammesso in determinate circostanze in Scozia non si estende automaticamente ai veicoli a motore. In Inghilterra, i parchi nazionali possono applicare regole e restrizioni specifiche ai camper.",
+    servizi:"Highland Council richiede di smaltire le acque reflue presso punti ufficiali. Per le altre aree le disposizioni vanno verificate con il gestore.",
+    locali:"Verificare separatamente Inghilterra, Scozia, Galles e Irlanda del Nord; poi council, area protetta, segnaletica e condizioni del parcheggio.",
+    verificatoIl:"22/11/2026",
+    fonti:[{titolo:"Highland Council – parcheggi camper e regole",url:"https://www.highland.gov.uk/tourism-visitor-attractions/highland-campervan-motorhome-scheme/4"},{titolo:"Highland Council – scheme per camper",url:"https://www.highland.gov.uk/tourism-visitor-attractions/highland-campervan-motorhome-scheme"},{titolo:"Lake District National Park – campervan parking",url:"https://lakedistrict.gov.uk/explore/where-to-stay/campervans-and-where-to-park/"},{titolo:"Highland Council – access rights and vehicles",url:"https://www1.highland.gov.uk/outdoorhighlands/info/8/access_in_scotland/6/access_in_scotland"}]
+  }
 };
 export const normeVerificateIl="19/11/2026";
