@@ -122,7 +122,7 @@ async function loadGroup(gid){
     shoppingCache=snap.docs.map(d=>({id:d.id,...d.data()})); shoppingSync=!snap.metadata.fromCache&&!snap.metadata.hasPendingWrites;refreshSyncState();renderShopping(); updateSummaries();
   },err=>{syncError=true;refreshSyncState();toast("Errore lista spesa: "+err.message);});
   unsubWishlist=onSnapshot(query(colRef("wishlist"),orderBy("createdAt","desc")),{includeMetadataChanges:true},snap=>{
-    wishlistCache=snap.docs.map(d=>({id:d.id,...d.data()})); wishlistSync=!snap.metadata.fromCache&&!snap.metadata.hasPendingWrites;refreshSyncState();renderWishlist(); renderSavedPlaces(); updateSummaries();
+    wishlistCache=snap.docs.map(d=>({id:d.id,...d.data()})); wishlistSync=!snap.metadata.fromCache&&!snap.metadata.hasPendingWrites;refreshSyncState();renderWishlist(); renderSavedPlaces(); updateNearbyState(); updateSummaries();
   },err=>{syncError=true;refreshSyncState();toast("Errore mete: "+err.message);});
   // Ricevi gli aggiornamenti dei dati camper dagli altri dispositivi.
   unsubVehicle=onSnapshot(doc(db,"groups",gid,"settings","vehicle"),{includeMetadataChanges:true},snap=>{
@@ -143,6 +143,23 @@ function renderShopping(){
     ul.appendChild(li);
   }
 }
+function parseGpsInputs(latValue,lonValue){
+  const lat=String(latValue||"").trim().replace(",",".");
+  const lon=String(lonValue||"").trim().replace(",",".");
+  if(!lat&&!lon)return null;
+  if(!lat||!lon||!/^-?\d+(?:\.\d+)?$/.test(lat)||!/^-?\d+(?:\.\d+)?$/.test(lon)){
+    throw new Error("Inserisci entrambe le coordinate GPS in formato numerico (latitudine e longitudine).");
+  }
+  const result=gpsPoint({latitude:Number(lat),longitude:Number(lon)});
+  if(!result)throw new Error("Coordinate fuori intervallo: latitudine da -90 a 90, longitudine da -180 a 180.");
+  return result;
+}
+function gpsInput(placeholder,value){
+  const input=document.createElement("input");input.type="text";input.inputMode="decimal";
+  input.placeholder=placeholder;input.value=value??"";input.setAttribute("aria-label",placeholder);
+  input.maxLength=25;return input;
+}
+
 function renderWishlist(){
   const ul=$("wishlistList");ul.innerHTML="";
   $("wishlistEmpty").classList.toggle("hidden",wishlistCache.length>0);
@@ -152,6 +169,28 @@ function renderWishlist(){
     const mapsUrl="https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q);
     li.innerHTML=`<div class="item-main"><div class="item-title">${escapeHTML(place.name)}</div><div class="item-meta">${escapeHTML(place.address||"Località da definire")} · Priorità ${escapeHTML(place.priority||"media")}</div><div class="item-meta">${escapeHTML(authorLabel(place.createdBy))}</div>${place.notes?`<p class="muted small">${escapeHTML(place.notes)}</p>`:""}<p><a href="${mapsUrl}" target="_blank" rel="noopener">Apri in Google Maps ↗</a></p></div><div class="item-actions"><button class="icon-btn delete-btn">Elimina</button></div>`;
     li.querySelector(".delete-btn").addEventListener("click",async()=>{if(confirm(`Eliminare la meta “${place.name}”?`)&&canWrite())try{await deleteDoc(doc(db,"groups",groupId,"wishlist",place.id));toast("Meta eliminata.");}catch(err){writeFailed("Eliminazione meta",err);}});
+    const gps=gpsPoint(place);
+    const details=document.createElement("details");details.className="gps-details";
+    const summary=document.createElement("summary");
+    summary.textContent=gps?"GPS salvato: "+gps.latitude.toFixed(5)+", "+gps.longitude.toFixed(5)+" · Modifica":"Aggiungi coordinate GPS";
+    const latitudeField=gpsInput("Latitudine, es. 45.4408",gps?.latitude);
+    const longitudeField=gpsInput("Longitudine, es. 12.3155",gps?.longitude);
+    const save=document.createElement("button");save.type="button";save.className="secondary compact";save.textContent="Salva coordinate";
+    const note=document.createElement("small");note.className="muted";note.textContent="Lascia entrambi i campi vuoti per rimuovere il GPS. I valori sono condivisi con la famiglia.";
+    const inputs=document.createElement("div");inputs.className="gps-editor";
+    inputs.append(latitudeField,longitudeField,save,note);details.append(summary,inputs);
+    save.addEventListener("click",async()=>{
+      if(!canWrite())return;
+      try{
+        const next=parseGpsInputs(latitudeField.value,longitudeField.value);
+        await updateDoc(doc(db,"groups",groupId,"wishlist",place.id),{
+          latitude:next?.latitude??null,longitude:next?.longitude??null,updatedAt:serverTimestamp(),updatedBy:currentUser.uid
+        });
+        writeSucceeded("Coordinate della meta aggiornate.");
+      }catch(error){writeFailed("Coordinate GPS",error);}
+    });
+    li.querySelector(".item-main").appendChild(details);
+
     ul.appendChild(li);
   }
 }
@@ -193,7 +232,14 @@ $("resetShoppingBtn").addEventListener("click",async()=>{
   try{const batch=writeBatch(db);shoppingCache.filter(x=>x.checked).forEach(item=>batch.update(doc(db,"groups",groupId,"shopping",item.id),{checked:false,updatedAt:serverTimestamp(),updatedBy:currentUser.uid}));await batch.commit();writeSucceeded("Spunte azzerate. Gli articoli restano nella lista.");}catch(err){writeFailed("Reset spunte",err);}
 });
 $("wishlistForm").addEventListener("submit",async e=>{
-  e.preventDefault();if(!canWrite())return;try{await addDoc(colRef("wishlist"),{name:$("placeName").value.trim(),address:$("placeAddress").value.trim(),priority:$("placePriority").value,notes:$("placeNotes").value.trim(),createdAt:serverTimestamp(),createdBy:currentUser.uid,updatedAt:serverTimestamp()});$("wishlistForm").reset();writeSucceeded("Meta salvata.");}catch(err){writeFailed("Salvataggio meta",err);}
+  e.preventDefault();if(!canWrite())return;
+  try{
+    const gps=parseGpsInputs($("placeLatitude").value,$("placeLongitude").value);
+    const data={name:$("placeName").value.trim(),address:$("placeAddress").value.trim(),priority:$("placePriority").value,notes:$("placeNotes").value.trim(),createdAt:serverTimestamp(),createdBy:currentUser.uid,updatedAt:serverTimestamp()};
+    if(gps)Object.assign(data,gps);
+    await addDoc(colRef("wishlist"),data);
+    $("wishlistForm").reset();writeSucceeded("Meta salvata.");
+  }catch(err){writeFailed("Salvataggio meta",err);}
 });
 $("vehicleForm").addEventListener("input",()=>{vehicleDirty=true;});
 $("vehicleForm").addEventListener("submit",async e=>{
