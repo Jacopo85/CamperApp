@@ -20,7 +20,7 @@ function showCard(i){
     content+=paragraph('Norme regionali, comunali e locali',rules.locali);
     content+='<h4>Fonti consultate</h4><ul>';
     rules.fonti.forEach(f=>{content+='<li><a href="'+escapeHTML(f.url)+'" target="_blank" rel="noopener">'+escapeHTML(f.titolo)+'</a></li>';});
-    content+='</ul><p class="small muted">Data consultazione fonti: '+escapeHTML(normeVerificateIl)+'. La data non certifica che ogni ordinanza locale sia stata verificata.</p>';
+    content+='</ul><p class="small muted">Data consultazione fonti: '+escapeHTML(rules.verificatoIl||normeVerificateIl)+'. La data non certifica che ogni ordinanza locale sia stata verificata.</p>';
   }else{
     content+='<p><strong>Stato: normativa di sosta ancora da verificare con fonti istituzionali.</strong></p>';
     content+=paragraph('Sosta diurna e notturna','Non sono ancora disponibili nella scheda fonti normative sufficienti a indicare dove sia consentito fermarsi o pernottare.');
