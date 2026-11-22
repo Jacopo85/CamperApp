@@ -51,6 +51,7 @@
         <span id="syncState" class="sync-pill">Non sincronizzato</span>
       </div>
       <p id="writeState" class="notice warning hidden" role="alert" aria-live="assertive"></p>
+      <button id="deadlineBanner" type="button" class="deadline-banner hidden" aria-label="Apri le scadenze del camper"></button>
 
       <nav class="tabs" aria-label="Sezioni">
         <button class="tab active" data-tab="home">Home</button>
@@ -70,7 +71,7 @@
         <div class="dashboard-grid">
           <button class="dash-card" data-goto="shopping"><span>🛒</span><strong>Lista della spesa</strong><small id="shoppingSummary">Caricamento…</small></button>
           <button class="dash-card" data-goto="wishlist"><span>📍</span><strong>Mete dei desideri</strong><small id="wishlistSummary">Caricamento…</small></button>
-          <button class="dash-card" data-goto="vehicle"><span>🚐</span><strong>Profilo camper</strong><small>Dimensioni e limiti</small></button>
+          <button class="dash-card" data-goto="vehicle"><span>🚐</span><strong>Profilo camper</strong><small id="deadlineHomeSummary">Dimensioni e scadenze</small></button>
           <button class="dash-card" data-goto="guide"><span>🌍</span><strong>Europa in camper</strong><small>Norme da verificare e mete consigliate</small></button>
           <button class="dash-card" data-goto="itinerary"><span>🧭</span><strong>Pianifica itinerario</strong><small>Partenza automatica o manuale</small></button>
           <a class="dash-card link-card" href="https://www.google.com/maps" target="_blank" rel="noopener"><span>🗺️</span><strong>Apri Google Maps</strong><small>La navigazione parte dal telefono collegato ad Android Auto</small></a>
@@ -195,9 +196,37 @@
           <label>Massa massima autorizzata (kg)<input id="vehicleMass" type="number" step="1" min="0" value="3500" required></label>
           <button type="submit">Salva dati camper</button>
         </form>
+        <div class="card camper-deadlines">
+          <h3>📅 Scadenzario del camper</h3>
+          <p class="muted">Bollo, assicurazione, tagliando, revisione, manutenzioni e altre scadenze condivise. Inserisci le date reali: non vengono calcolate automaticamente.</p>
+          <form id="deadlineForm" class="deadline-form">
+            <label>Tipo<select id="deadlineCategory"><option>Bollo</option><option>Assicurazione</option><option>Tagliando</option><option>Revisione</option><option>Manutenzione</option><option>Altro</option></select></label>
+            <label>Descrizione<input id="deadlineTitle" type="text" maxlength="100" required placeholder="Es. Rinnovo polizza"></label>
+            <label>Data di scadenza<input id="deadlineDate" type="date" required></label>
+            <label>Avvisami prima<select id="deadlineLead">
+              <option value="0">Il giorno stesso</option><option value="1">1 giorno</option>
+              <option value="3">3 giorni</option><option value="7" selected>7 giorni</option>
+              <option value="15">15 giorni</option><option value="30">30 giorni</option>
+              <option value="60">60 giorni</option><option value="90">90 giorni</option>
+            </select></label>
+            <label class="deadline-wide">Note facoltative<textarea id="deadlineNotes" maxlength="400" rows="2" placeholder="Es. Contattare officina; evita dati riservati"></textarea></label>
+            <div class="deadline-actions deadline-wide">
+              <button id="deadlineSaveBtn" type="submit">Salva scadenza</button>
+              <button id="deadlineCancelEdit" type="button" class="secondary hidden">Annulla modifica</button>
+            </div>
+          </form>
+          <p id="deadlineSyncState" class="small muted" role="status">Caricamento scadenze…</p>
+          <div class="deadline-toolbar">
+            <button id="deadlineEnableNotifications" type="button" class="secondary">🔔 Attiva avvisi con app aperta</button>
+            <button id="deadlineExportAll" type="button" class="secondary" disabled>📆 Esporta tutte (.ics)</button>
+          </div>
+          <p id="deadlineNotificationState" class="small muted" role="status">Per avere notifiche anche con CamperApp chiusa, usa il pulsante Google Calendar delle scadenze e imposta il preavviso nell’evento. La creazione va confermata manualmente.</p>
+          <div id="deadlineList" class="deadline-list" aria-live="polite"></div>
+          <p class="small muted">Il file .ics include il preavviso scelto alle 09:00, per calendari compatibili. Google Calendar su Android non importa direttamente .ics: usa il pulsante Google Calendar e imposta la notifica. Dopo un rinnovo aggiorna anche il calendario.</p>
+        </div>
         <div class="notice warning"><strong>Importante</strong><p>Queste misure sono promemoria per valutare soste e itinerari. La prima versione non calcola percorsi stradali certificati per camper e non può garantire che una strada sia transitabile.</p></div>
       </section>
-      <footer class="app-footer">CamperApp Family · versione 16 · <span id="userLabel"></span></footer>
+      <footer class="app-footer">CamperApp Family · versione 17 · <span id="userLabel"></span></footer>
     </section>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
