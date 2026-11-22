@@ -84,6 +84,282 @@ export const normeSosta = {
     locali:"Verificare separatamente Inghilterra, Scozia, Galles e Irlanda del Nord; poi council, area protetta, segnaletica e condizioni del parcheggio.",
     verificatoIl:"22/11/2026",
     fonti:[{titolo:"Highland Council – parcheggi camper e regole",url:"https://www.highland.gov.uk/tourism-visitor-attractions/highland-campervan-motorhome-scheme/4"},{titolo:"Highland Council – scheme per camper",url:"https://www.highland.gov.uk/tourism-visitor-attractions/highland-campervan-motorhome-scheme"},{titolo:"Lake District National Park – campervan parking",url:"https://lakedistrict.gov.uk/explore/where-to-stay/campervans-and-where-to-park/"},{titolo:"Highland Council – access rights and vehicles",url:"https://www1.highland.gov.uk/outdoorhighlands/info/8/access_in_scotland/6/access_in_scotland"}]
-  }
+  },
+  "Portogallo": {
+  "notte": "Il portale ufficiale segnala il divieto di pernottamento nelle aree della Rete Natura 2000, nelle aree protette e nelle aree dei piani di gestione costiera, salvo luoghi espressamente autorizzati. Altrove, in assenza di regolamenti comunali, per gli autocaravan omologati dall'IMT è indicato un massimo di 48 ore nello stesso Comune, salvo autorizzazioni più estese.",
+  "campeggio": "Non equiparare la normale sosta stradale al campeggio libero o all'occupazione esterna dello spazio. Verificare norme e consensi richiesti.",
+  "servizi": "Il portale turistico indica aree attrezzate per carico di acqua potabile e scarico di acque saponate, fecali e rifiuti; alcune aree dedicate al pernottamento prevedono limiti propri.",
+  "locali": "Restano da consultare regolamenti comunali, aree protette, segnaletica, limiti orari e condizioni delle singole strutture.",
+  "stato": "Informazioni ufficiali sul pernottamento verificate; comuni e aree tutelate da controllare",
+  "ambito": "Turismo de Portugal: regole nazionali per autocaravan omologate e limiti territoriali",
+  "sosta": "La sosta stradale deve rispettare le regole di circolazione e la segnaletica. La fonte distingue parcheggio, pernottamento e aree di servizio.",
+  "verificatoIl": "22/11/2026",
+  "fonti": [
+    {
+      "titolo": "Turismo de Portugal – viaggiare in camper",
+      "url": "https://www.visitportugal.com/it/content/viaggiare-in-camper"
+    }
+  ]
+},
+  "Austria": {
+  "notte": "Non è verificata un'autorizzazione generale al pernottamento in ogni parcheggio. Controllare le restrizioni locali e l'eventuale destinazione del luogo.",
+  "campeggio": "Il campeggio e pernottamento nei boschi sono in linea di principio vietati senza consenso del proprietario; altrove serve verificare il Land. Non si applica una regola nazionale unica al campeggio libero.",
+  "servizi": "Usare gli appositi impianti per il carico e lo scarico; condizioni del gestore, disponibilità e vincoli locali da verificare.",
+  "locali": "Restano da consultare regolamenti comunali, aree protette, segnaletica, limiti orari e condizioni delle singole strutture.",
+  "stato": "Quadro federale sulle foreste e ripartizione per Land verificati",
+  "ambito": "Portale governativo austriaco: foreste, leggi dei Länder e ordinanze comunali",
+  "sosta": "Il governo federale precisa che campeggio fuori campeggio e sosta dei camper non sono regolamentati uniformemente in tutto il Paese; si applicano prescrizioni dei Länder e talora dei Comuni.",
+  "verificatoIl": "22/11/2026",
+  "fonti": [
+    {
+      "titolo": "Governo Austria – Camping",
+      "url": "https://www.oesterreich.gv.at/en/themen/reisen_und_freizeit/freizeit-in-der-natur/campen"
+    },
+    {
+      "titolo": "Governo Austria – Camping nei boschi",
+      "url": "https://www.oesterreich.gv.at/de/themen/reisen_und_freizeit/freizeit-in-der-natur/freizeit_im_wald/Seite.3750020"
+    }
+  ]
+},
+  "Slovenia": {
+  "notte": "Non è verificata un'autorizzazione generale al pernottamento in ogni parcheggio. Controllare le restrizioni locali e l'eventuale destinazione del luogo.",
+  "campeggio": "Il portale Natura 2000 indica che campeggiare in luogo pubblico non destinato a questo scopo o su suolo privato senza il consenso del proprietario non è consentito. Le regole del luogo e le eccezioni previste dalla legge richiedono verifica.",
+  "servizi": "Usare gli appositi impianti per il carico e lo scarico; condizioni del gestore, disponibilità e vincoli locali da verificare.",
+  "locali": "Restano da consultare regolamenti comunali, aree protette, segnaletica, limiti orari e condizioni delle singole strutture.",
+  "stato": "Divieti in ambiente naturale documentati da fonti governative",
+  "ambito": "GOV.SI e Natura 2000: circolazione e campeggio in natura",
+  "sosta": "Secondo il Governo, la guida, la fermata e il parcheggio di veicoli motorizzati nell'ambiente naturale sono vietati salvo le eccezioni previste dalla disciplina applicabile; una regola stradale ordinaria non autorizza sosta fuori strada.",
+  "verificatoIl": "22/11/2026",
+  "fonti": [
+    {
+      "titolo": "GOV.SI – veicoli a motore nell'ambiente naturale",
+      "url": "https://www.gov.si/novice/2025-09-02-stop-motornim-vozilom-v-naravi/"
+    },
+    {
+      "titolo": "Natura 2000 Slovenia – ricreazione e campeggio",
+      "url": "https://natura2000.gov.si/na-terenu/rekreacija/"
+    }
+  ]
+},
+  "Islanda": {
+  "notte": "L'agenzia ambientale specifica che pernottare in camper, roulotte e veicoli analoghi fuori da campeggi organizzati o zone urbane è illegale senza il permesso del proprietario o dell'avente diritto. I parchi e le aree protette possono avere vincoli ulteriori.",
+  "campeggio": "Le deroghe relative a tende tradizionali non vanno estese ai camper. Numerose aree naturali protette consentono campeggio e pernottamento soltanto in siti segnalati.",
+  "servizi": "Usare gli appositi impianti per il carico e lo scarico; condizioni del gestore, disponibilità e vincoli locali da verificare.",
+  "locali": "Restano da consultare regolamenti comunali, aree protette, segnaletica, limiti orari e condizioni delle singole strutture.",
+  "stato": "Disciplina del pernottamento in camper verificata su fonte ambientale ufficiale",
+  "ambito": "Agenzia ambientale islandese; Nature Conservation Act 60/2013",
+  "sosta": "Le regole per sostare su strada e in aree urbane vanno verificate nel singolo parcheggio; non è possibile dedurre un diritto generale alla sosta fuoristrada.",
+  "verificatoIl": "22/11/2026",
+  "fonti": [
+    {
+      "titolo": "Umhverfisstofnun – Where can you camp?",
+      "url": "https://www.ust.is/english/visiting-iceland/travel-information/where-can-you-camp/"
+    }
+  ]
+},
+  "Danimarca": {
+  "notte": "Il portale turistico afferma che in certe aree di sosta è possibile dormire nel camper senza trasformare la sosta in campeggio, salvo cartelli contrari; nei campeggi autorizzati la notte è prevista.",
+  "campeggio": "Le zone destinate al campeggio selvaggio in tenda non ammettono automaticamente camper o altri veicoli motorizzati.",
+  "servizi": "Usare gli appositi impianti per il carico e lo scarico; condizioni del gestore, disponibilità e vincoli locali da verificare.",
+  "locali": "Restano da consultare regolamenti comunali, aree protette, segnaletica, limiti orari e condizioni delle singole strutture.",
+  "stato": "Orientamenti ufficiali del turismo nazionale per camper",
+  "ambito": "VisitDenmark – informazioni pratiche; verificare segnaletica e regolamenti",
+  "sosta": "VisitDenmark descrive la possibilità di parcheggiare su aree di sosta, inclusi alcuni parcheggi pubblici, purché non si allestisca un campeggio e la segnaletica lo consenta.",
+  "verificatoIl": "22/11/2026",
+  "fonti": [
+    {
+      "titolo": "VisitDenmark – dove parcheggiare il camper",
+      "url": "https://www.visitdenmark.com/faq/where-to-park-your-campervan-in-denmark"
+    },
+    {
+      "titolo": "VisitDenmark – campeggio libero",
+      "url": "https://www.visitdenmark.com/faq/wild-camping"
+    }
+  ]
+},
+  "Lettonia": {
+  "notte": "Il pernottamento va distinto dalla mera sosta: l'allestimento di tavoli, barbecue o tendalino trasforma il comportamento in attività assimilabile al campeggio, soggetta a permessi e regole del posto.",
+  "campeggio": "In zone naturali protette e fasce dunali possono valere divieti o autorizzazioni specifiche per tende, accampamenti e veicoli; non assumere che il campeggio sia libero.",
+  "servizi": "Usare gli appositi impianti per il carico e lo scarico; condizioni del gestore, disponibilità e vincoli locali da verificare.",
+  "locali": "Restano da consultare regolamenti comunali, aree protette, segnaletica, limiti orari e condizioni delle singole strutture.",
+  "stato": "Indicazioni ufficiali del turismo nazionale specifiche per camper",
+  "ambito": "Latvia Travel: regole stradali e distinzioni con campeggio",
+  "sosta": "Latvia Travel precisa che il viaggio in camper è soggetto alle regole generali di circolazione, arresto, parcheggio e segnaletica.",
+  "verificatoIl": "22/11/2026",
+  "fonti": [
+    {
+      "titolo": "Latvia Travel – Campervan Travel",
+      "url": "https://www.latvia.travel/en/campervan-travel"
+    }
+  ]
+},
+  "Lussemburgo": {
+  "notte": "Non è verificata un'autorizzazione generale al pernottamento in ogni parcheggio. Controllare le restrizioni locali e l'eventuale destinazione del luogo.",
+  "campeggio": "Visit Luxembourg specifica che il campeggio libero non è consentito. Non dedurre un divieto generalizzato di normale parcheggio dalla sola disciplina del campeggio.",
+  "servizi": "Usare gli appositi impianti per il carico e lo scarico; condizioni del gestore, disponibilità e vincoli locali da verificare.",
+  "locali": "Restano da consultare regolamenti comunali, aree protette, segnaletica, limiti orari e condizioni delle singole strutture.",
+  "stato": "Divieto di campeggio libero riportato dall'ente turistico nazionale",
+  "ambito": "Visit Luxembourg – informazioni sul campeggio",
+  "sosta": "Le condizioni della sosta dei veicoli sulle strade e nei parcheggi non sono state verificate a livello nazionale in questa scheda.",
+  "verificatoIl": "22/11/2026",
+  "fonti": [
+    {
+      "titolo": "Visit Luxembourg – camping",
+      "url": "https://www.visitluxembourg.com/plan-your-stay/stay/camping"
+    }
+  ]
+},
+  "Finlandia": {
+  "notte": "Non è verificata un'autorizzazione generale al pernottamento in ogni parcheggio. Controllare le restrizioni locali e l'eventuale destinazione del luogo.",
+  "campeggio": "Luontoon indica che nei parchi nazionali e in varie altre aree protette il campeggio è normalmente limitato alle zone designate; il diritto di accesso alla natura non autorizza a entrare con veicoli motorizzati ovunque.",
+  "servizi": "Usare gli appositi impianti per il carico e lo scarico; condizioni del gestore, disponibilità e vincoli locali da verificare.",
+  "locali": "Restano da consultare regolamenti comunali, aree protette, segnaletica, limiti orari e condizioni delle singole strutture.",
+  "stato": "Regole delle aree protette documentate da ente pubblico; disciplina stradale da approfondire",
+  "ambito": "Luontoon/Metsähallitus – campeggio nelle aree naturali",
+  "sosta": "Le regole generali per parcheggiare un camper non sono state verificate in questa scheda. Per le aree naturali attenersi a strade e parcheggi consentiti.",
+  "verificatoIl": "22/11/2026",
+  "fonti": [
+    {
+      "titolo": "Luontoon – Accommodation during the hike",
+      "url": "https://www.luontoon.fi/en/activities/hiking-and-outdoor-recreation/tips/visitor-guidelines/accommodation-during-the-hike"
+    }
+  ]
+},
+  "Lituania": {
+  "notte": "Non è verificata un'autorizzazione generale al pernottamento in ogni parcheggio. Controllare le restrizioni locali e l'eventuale destinazione del luogo.",
+  "campeggio": "Il portale turistico pubblica raccomandazioni sulle attività di campeggio e tutela ambientale; non è una conferma di permesso generalizzato a campeggiare liberamente con autocaravan.",
+  "servizi": "Usare gli appositi impianti per il carico e lo scarico; condizioni del gestore, disponibilità e vincoli locali da verificare.",
+  "locali": "Restano da consultare regolamenti comunali, aree protette, segnaletica, limiti orari e condizioni delle singole strutture.",
+  "stato": "Raccomandazioni del portale turistico nazionale; disciplina camper da verificare",
+  "ambito": "Lithuania Travel – raccomandazioni per campeggio e natura",
+  "sosta": "Le fonti consultate non sono sufficienti a confermare un regime uniforme di pernottamento in camper su strade e parcheggi.",
+  "verificatoIl": "22/11/2026",
+  "fonti": [
+    {
+      "titolo": "Lithuania Travel – camping rules",
+      "url": "https://lithuania.travel/en/what-to-do/active-recreation/cycling-trips/camping-rules-and-recommendations"
+    }
+  ]
+},
+  "Polonia": {
+  "notte": "Non è verificata un'autorizzazione generale al pernottamento in ogni parcheggio. Controllare le restrizioni locali e l'eventuale destinazione del luogo.",
+  "campeggio": "L'ente forestale ricorda che il campeggio libero nei boschi demaniali è soggetto a restrizioni; il programma Zanocuj w lesie riguarda aree dedicate e non conferisce libertà di entrare e campeggiare con il camper.",
+  "servizi": "Usare gli appositi impianti per il carico e lo scarico; condizioni del gestore, disponibilità e vincoli locali da verificare.",
+  "locali": "Restano da consultare regolamenti comunali, aree protette, segnaletica, limiti orari e condizioni delle singole strutture.",
+  "stato": "Restrizioni nei boschi documentate; disciplina camper generale non verificata",
+  "ambito": "Lasy Państwowe – foreste demaniali e programma di bivacco",
+  "sosta": "Nei parcheggi e sulle strade valgono la segnaletica e le regole di circolazione; le fonti esaminate non consentono di qualificare il pernottamento in camper in ogni area del Paese.",
+  "verificatoIl": "22/11/2026",
+  "fonti": [
+    {
+      "titolo": "Lasy Państwowe – pernottamento nei boschi",
+      "url": "https://www.torun.lasy.gov.pl/aktualnosci/-/asset_publisher/nvOIxFTyIZoF/content/jak-nocowac-w-lesie-odpowiedzialnie-i-nie-zostawiac-po-sobie-sladu-obejrzyj-webinar"
+    }
+  ]
+},
+  "Repubblica Ceca": {
+  "notte": "Non è verificata un'autorizzazione generale al pernottamento in ogni parcheggio. Controllare le restrizioni locali e l'eventuale destinazione del luogo.",
+  "campeggio": "Il portale turistico distingue campeggio libero e bivacco; quest'ultimo può essere consentito in determinate circostanze ma il dato non autorizza l'uso di camper fuori da aree autorizzate.",
+  "servizi": "Usare gli appositi impianti per il carico e lo scarico; condizioni del gestore, disponibilità e vincoli locali da verificare.",
+  "locali": "Restano da consultare regolamenti comunali, aree protette, segnaletica, limiti orari e condizioni delle singole strutture.",
+  "stato": "Orientamenti turistici sul campeggio; normativa stradale e locale incompleta",
+  "ambito": "VisitCzechia – campeggi, wild camping e bivacco",
+  "sosta": "Le norme specifiche per il pernottamento dei camper in parcheggi stradali non sono state verificate.",
+  "verificatoIl": "22/11/2026",
+  "fonti": [
+    {
+      "titolo": "VisitCzechia – camping",
+      "url": "https://www.visitczechia.com/de-de/things-to-do/category-group-pages/active-holiday/summer-activities/camping"
+    }
+  ]
+},
+  "Andorra": {
+  "notte": "Secondo l'ente turistico nazionale, il pernottamento nei camper con occupanti è vietato fuori da campeggi, aree camping e aree esplicitamente designate per autocaravan.",
+  "campeggio": "Il divieto comprende l'allestimento del veicolo con accessori e occupazione esterna nei luoghi non autorizzati. Le regole sull'escursionismo con tenda non equivalgono a un permesso per camper.",
+  "servizi": "Usare gli appositi impianti per il carico e lo scarico; condizioni del gestore, disponibilità e vincoli locali da verificare.",
+  "locali": "Restano da consultare regolamenti comunali, aree protette, segnaletica, limiti orari e condizioni delle singole strutture.",
+  "stato": "Divieto di pernottamento fuori dalle aree autorizzate documentato da ente turistico nazionale",
+  "ambito": "Visit Andorra – regole sui camper",
+  "sosta": "Visit Andorra indica aree specifiche per il parcheggio diurno di autocaravan e furgoni attrezzati.",
+  "verificatoIl": "22/11/2026",
+  "fonti": [
+    {
+      "titolo": "Visit Andorra – motorhome rules",
+      "url": "https://visitandorra.com/en/visitor-information/accommodations/discover-andorra-by-motorhome/"
+    }
+  ]
+},
+  "San Marino": {
+  "notte": "Non è stata verificata in questa scheda una regola nazionale che consenta il pernottamento in qualsiasi parcheggio; utilizzare soltanto aree che lo consentono espressamente.",
+  "campeggio": "Non equiparare la normale sosta stradale al campeggio libero o all'occupazione esterna dello spazio. Verificare norme e consensi richiesti.",
+  "servizi": "Visit San Marino pubblica anche la scheda Camper Service Serravalle: disponibilità, orari e utilizzo devono essere verificati prima della visita.",
+  "locali": "Restano da consultare regolamenti comunali, aree protette, segnaletica, limiti orari e condizioni delle singole strutture.",
+  "stato": "Aree di sosta ufficiali individuate; disciplina completa del campeggio non verificata",
+  "ambito": "Visit San Marino – elenco ufficiale parcheggi e camper service",
+  "sosta": "Il portale turistico ufficiale identifica parcheggi riservati ai camper e un'area a Fonte dell'Ovo. Le modalità, i costi e gli orari sono da verificare per l'area scelta.",
+  "verificatoIl": "22/11/2026",
+  "fonti": [
+    {
+      "titolo": "Visit San Marino – parcheggi",
+      "url": "https://visitsanmarino.com/pub1/VisitSM/contenuto/Vivi/Parcheggi_a_San_Marino.html"
+    },
+    {
+      "titolo": "Visit San Marino – area Fonte dell'Ovo",
+      "url": "https://visitsanmarino.com/pub1/VisitSM/luogo/Turismo-all-aria-aperta/Area-di-sosta-di-Fonte-dell-Ovo.html"
+    },
+    {
+      "titolo": "Visit San Marino – Camper Service Serravalle",
+      "url": "https://www.visitsanmarino.com/pub2/VisitSM/luogo/Turismo-all-aria-aperta/Camper-Service-Serravalle.html"
+    }
+  ]
+},
+  "Liechtenstein": {
+  "notte": "Non è verificata un'autorizzazione generale al pernottamento in ogni parcheggio. Controllare le restrizioni locali e l'eventuale destinazione del luogo.",
+  "campeggio": "L'autorità consolare belga indica che il campeggio libero, anche in camper, è ammesso soltanto in condizioni molto particolari e in singoli luoghi: non presumere di poter campeggiare ovunque.",
+  "servizi": "Usare gli appositi impianti per il carico e lo scarico; condizioni del gestore, disponibilità e vincoli locali da verificare.",
+  "locali": "Restano da consultare regolamenti comunali, aree protette, segnaletica, limiti orari e condizioni delle singole strutture.",
+  "stato": "Indicazioni consolari ufficiali sulle limitazioni al campeggio libero; norme nazionali da approfondire",
+  "ambito": "Ministero degli Esteri belga – consigli ai viaggiatori",
+  "sosta": "Non è verificata una disciplina unica dei parcheggi con camper; controllare i parcheggi indicati dal Comune e la segnaletica.",
+  "verificatoIl": "22/11/2026",
+  "fonti": [
+    {
+      "titolo": "Belgio – consigli ai viaggiatori, Liechtenstein",
+      "url": "https://diplomatie.belgium.be/fr/pays/liechtenstein/voyager-au-liechtenstein-conseils-aux-voyageurs/transport-au-liechtenstein"
+    }
+  ]
+},
+  "Svizzera": {
+  "notte": "Non è verificata un'autorizzazione generale al pernottamento in ogni parcheggio. Controllare le restrizioni locali e l'eventuale destinazione del luogo.",
+  "campeggio": "Il campeggio libero può essere soggetto a prescrizioni cantonali, comunali e nelle aree protette; non è stata verificata una disciplina uniforme applicabile a tutto il Paese.",
+  "servizi": "Usare gli appositi impianti per il carico e lo scarico; condizioni del gestore, disponibilità e vincoli locali da verificare.",
+  "locali": "Restano da consultare regolamenti comunali, aree protette, segnaletica, limiti orari e condizioni delle singole strutture.",
+  "stato": "Indicazioni ufficiali consolari sulle aree autorizzate; regole cantonali e comunali da verificare",
+  "ambito": "Ministero Esteri belga – Svizzera",
+  "sosta": "Le indicazioni consolari consigliano a caravan e camper di utilizzare spazi espressamente previsti e autorizzati dalle autorità locali. Non esiste in questa scheda un'autorizzazione valida per ogni Cantone.",
+  "verificatoIl": "22/11/2026",
+  "fonti": [
+    {
+      "titolo": "Belgio – consigli ai viaggiatori, Svizzera",
+      "url": "https://diplomatie.belgium.be/fr/pays/suisse/voyager-en-suisse-conseils-aux-voyageurs/transport-en-suisse"
+    }
+  ]
+},
+  "Città del Vaticano": {
+  "notte": "Non è verificata un'area pubblica di pernottamento in camper all'interno dello Stato. Per visitare i Musei e Piazza San Pietro occorre considerare le aree di sosta autorizzate nel Comune di Roma, soggette alla normativa italiana.",
+  "campeggio": "Non è documentato un diritto al campeggio turistico all'interno dello Stato della Città del Vaticano.",
+  "servizi": "Usare gli appositi impianti per il carico e lo scarico; condizioni del gestore, disponibilità e vincoli locali da verificare.",
+  "locali": "Restano da consultare regolamenti comunali, aree protette, segnaletica, limiti orari e condizioni delle singole strutture.",
+  "stato": "Fonte storica ufficiale sulla sosta interna; accesso pubblico in camper da verificare",
+  "ambito": "Santa Sede – atti del Governatorato (fonte storica, verificare attualità)",
+  "sosta": "Le disposizioni storiche pubblicate negli Acta Apostolicae Sedis disciplinano zone di parcheggio interne e accessi riservati; non forniscono un'autorizzazione turistica per entrare e parcheggiare un camper in Vaticano.",
+  "verificatoIl": "22/11/2026",
+  "fonti": [
+    {
+      "titolo": "Santa Sede – Acta Apostolicae Sedis, Supplemento 2000 (fonte storica)",
+      "url": "https://www.vatican.va/archive/aas/documents/AAS-92-2000-ocr.pdf"
+    }
+  ]
+}
 };
 export const normeVerificateIl="19/11/2026";
