@@ -29,8 +29,10 @@ function nationalDetails(rule){
   return html;
 }
 
+let selectedTerritory="";
 function showCard(index){
   const place=schede[index];if(!place)return;
+  selectedTerritory=place.name;
   const italy=place.kind==='regione';
   const national=normeSosta[italy?'Italia':place.name];
   const regional=italy?normeRegionali[place.name]:null;
@@ -82,5 +84,20 @@ function render(){
   });
   if(!count)list.textContent='Nessuna scheda trovata.';
 }
+const localForm=document.getElementById('guideLocalForm');
+localForm.addEventListener('submit',event=>{
+  event.preventDefault();
+  const municipality=document.getElementById('guideLocality').value.trim();
+  const notice=document.getElementById('guideLocalStatus');
+  if(!municipality){
+    notice.textContent='Scrivi prima il nome di un Comune o di una località.';
+    return;
+  }
+  const where=selectedTerritory||'Europa';
+  const q=municipality+' '+where+' ordinanza sosta camper autocaravan pernottamento regolamento Comune official municipality motorhome parking';
+  notice.textContent='La ricerca si apre sul web; verifica che i risultati provengano dall’autorità competente e siano aggiornati.';
+  window.open('https://www.google.com/search?q='+encodeURIComponent(q),'_blank','noopener');
+});
+
 search.addEventListener('input',render);
 render();
