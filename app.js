@@ -421,4 +421,8 @@ function friendlyError(e){
   if(code.includes("permission-denied"))return "Permesso negato. Verifica le regole di sicurezza Firestore nel README.";
   return e?.message||"Si è verificato un errore.";
 }
-if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+if("serviceWorker" in navigator)window.addEventListener("load",()=>{
+  navigator.serviceWorker.register("./sw.js",{updateViaCache:"none"})
+    .then(registration=>registration.update())
+    .catch(err=>console.warn("Controllo aggiornamenti non disponibile:",err));
+});
