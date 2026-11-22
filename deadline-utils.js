@@ -64,6 +64,25 @@ function foldICalLine(line){
   }
   return result+chunk;
 }
+// Evento già compilato sul sito Google Calendar; l'utente deve salvare
+// e impostare manualmente il preavviso (il link non può imporre l'allarme).
+export function deadlineGoogleCalendarUrl(item,timeZone="Europe/Rome"){
+  const entry=cleanDeadline(item);
+  if(!entry)return null;
+  const date=icsDate(entry.date);
+  const zone=String(timeZone||"Europe/Rome").trim();
+  const details="Scadenza CamperApp Family. Preavviso scelto: "+entry.leadDays+
+    " giorni prima. Imposta il promemoria nelle opzioni di Google Calendar e salva l'evento."+
+    (entry.notes?"\nNote: "+entry.notes:"");
+  const params=new URLSearchParams({
+    action:"TEMPLATE",
+    text:"Camper – "+entry.category+": "+entry.title,
+    dates:date+"T090000/"+date+"T093000",
+    details,
+    ctz:zone
+  });
+  return "https://calendar.google.com/calendar/render?"+params.toString();
+}
 export function deadlineIcs(items,now=new Date()){
   const valid=(Array.isArray(items)?items:[]).map(cleanDeadline).filter(Boolean);
   const lines=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//CamperApp Family//Scadenzario//IT","CALSCALE:GREGORIAN","METHOD:PUBLISH"];
