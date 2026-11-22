@@ -37,3 +37,20 @@ Prima di sostare, consultare la normativa del singolo luogo, i cartelli presenti
 - Regno Unito: indicazioni Highland Council relative solo agli spazi aderenti al programma, con orari e condizioni locali.
 - Svezia: fonte Naturvårdsverket sul divieto di accesso fuoristrada e sulle aree di riposo; la permanenza non è uniformemente disciplinata per tutti i parcheggi.
 - Non sono state verificate exhaustivamente eventuali modifiche di legge posteriori ai singoli documenti, tutte le ordinanze comunali o la raggiungibilità di ogni collegamento del catalogo.
+
+## Miglioramenti finali della ricognizione — 22/11/2026
+- **Valle d'Aosta:** sostituito il solo glossario turistico con il riferimento regionale LR 8/2002 sui complessi all'aperto e pagina istituzionale dedicata.
+- **Piemonte:** fonte istituzionale specifica sul turismo itinerante e riferimento all'articolo 8 della LR 5/2019.
+- **Sardegna:** LR 7/2022, limite ordinario di 72 ore nelle aree attrezzate di sosta temporanea, deroga fino a 120 ore per al massimo il 30% delle piazzole. Non applicare questi limiti ai parcheggi stradali ordinari.
+- **Amsterdam (Paesi Bassi):** la fonte ufficiale locale dispone parcheggio massimo 3 giorni consecutivi sulla strada pubblica e vieta il pernottamento nel mezzo. Non è una norma per tutto il Paese.
+- **Croazia:** art. 29 della legge ministeriale sulle attività ricettive; divieto di campeggio fuori da campeggi e aree specificamente individuate nei casi previsti. Il testo ministeriale consultato richiede una verifica delle modifiche successive.
+- **Svezia:** il diritto di accesso alla natura non consente l'uso del camper fuori strada; l'agenzia ambientale indica normalmente un limite di 24 ore nei giorni feriali nelle aree di riposo, con possibili differenze nel fine settimana e per segnaletica.
+- **Regno Unito (Highlands):** solo nei parcheggi aderenti allo schema Highland Council: pernottamento 22:00–08:00, senza ritorno nello stesso parcheggio entro 72 ore. Non è un regime nazionale.
+- **Spagna:** precisata l'importanza delle disposizioni municipali secondo la DGT 2026.
+- **Interfaccia:** la scheda italiana mostra prima la disciplina regionale, poi la regola nazionale all'interno di una sezione espandibile.
+- **Ricerca ordinanze comunali:** aggiunto un collegamento a ricerca web esterna basata sul Comune inserito; i risultati **non** sono controllati automaticamente dall'app e non sono fonti certificate.
+- **Verifiche di qualità:** sintassi controllata per i moduli JavaScript; test simulato di apertura per 66/66 schede, test dei campi per ricerca locale e verifica che il codice non tocchi Firestore.
+- **Cache:** aggiornata alla versione 15; consultazione offline resta prevista per i file già memorizzati.
+
+## Ambito della dichiarazione di completamento
+Si considera terminato **il lavoro di compilazione e integrazione dei 66 profili documentali del catalogo**, non l'audit legale esaustivo di tutte le ordinanze, le variazioni legislative e le aree di sosta europee. Non è stata effettuata una verifica in sito o un test manuale sui tre dispositivi Android per questo aggiornamento. Prima di un viaggio controllare le disposizioni del luogo e i segnali stradali.
