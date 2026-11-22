@@ -595,7 +595,16 @@ $("searchCampgroundsBtn").addEventListener("click",()=>openStopSearch("campgroun
 $("searchStopoversBtn").addEventListener("click",()=>openStopSearch("stopover"));
 $("searchServicesBtn").addEventListener("click",()=>openStopSearch("services"));
 
-document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.tab)));
+function goToCamperDeadlines(){
+  switchTab("vehicle");
+  const section=$("camperDeadlines");
+  if(section)section.scrollIntoView({behavior:"smooth",block:"start"});
+}
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{
+  if(b.id==="deadlinesShortcut")goToCamperDeadlines();
+  else switchTab(b.dataset.tab);
+}));
+$("homeDeadlinesShortcut").addEventListener("click",goToCamperDeadlines);
 document.querySelectorAll("[data-goto]").forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.goto)));
 onAuthStateChanged(auth,async user=>{
   cleanup();currentUser=user;show("logoutBtn",!!user);
