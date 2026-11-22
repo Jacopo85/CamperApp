@@ -7,6 +7,7 @@ export function createDeadlineUI({db,getUser,getGroup,canWrite,onToast,onWriteFa
   const $=id=>document.getElementById(id);
   let group=null,unsubscribe=null,entries=[],loaded=false,editing=null,busy=false;
   const pendingNotifications=new Set();
+  const notifiedThisSession=new Set();
   const prefKey="camperapp-deadlines-foreground-notifications-v1";
   const eventForm=$("deadlineForm");
 
@@ -159,7 +160,7 @@ export function createDeadlineUI({db,getUser,getGroup,canWrite,onToast,onWriteFa
       for(const entry of matching){
         if(group!==getGroup())return;
         const key=["camperapp",user.uid,group,entry.id,entry.date,entry.leadDays].join("|");
-        if(pendingNotifications.has(key))continue;
+        if(pendingNotifications.has(key)||notifiedThisSession.has(key))continue;
         let wasShown=false;
         try{wasShown=localStorage.getItem(key)==="shown";}catch{}
         if(wasShown)continue;
@@ -169,6 +170,7 @@ export function createDeadlineUI({db,getUser,getGroup,canWrite,onToast,onWriteFa
             body:entry.title+" · "+formatDeadlineDate(entry.date)+" · "+deadlineState(entry).text,
             tag:"camperapp-deadline-"+entry.id
           });
+          notifiedThisSession.add(key);
           try{localStorage.setItem(key,"shown");}catch{}
         }catch(error){console.warn("Avviso scadenza non disponibile:",error);}
         finally{pendingNotifications.delete(key);}
