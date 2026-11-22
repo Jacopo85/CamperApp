@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebas
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, addDoc, collection, onSnapshot, updateDoc, deleteDoc, serverTimestamp, query, orderBy, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
+import { gpsPoint, gpsDistanceKm, arrangeByAirDistance, gpsOrigin } from "./route-geo.js";
 
 const $ = id => document.getElementById(id);
 const app = initializeApp(firebaseConfig);
@@ -21,6 +22,7 @@ function writeNotice(text){
   notice.classList.toggle("hidden",!text);
 }
 function canWrite(){
+  if(!currentUser||!groupId){toast("Accedi al gruppo familiare prima di modificare i dati.");return false;}
   if(navigator.onLine)return true;
   writeNotice("Salvataggio non avviato: sei offline. Riconnettiti e riprova; la modifica non è stata inviata.");
   toast("Offline: operazione non avviata.");
@@ -103,7 +105,11 @@ async function loadAuthorNames(gid){
     console.warn("Nomi autori non disponibili:",err);
   }
 }
-function inviteCode(){const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let out="";for(let i=0;i<12;i++)out+=chars[Math.floor(Math.random()*chars.length)];return out;}
+function inviteCode(){
+  const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const random=new Uint8Array(12);crypto.getRandomValues(random);
+  return Array.from(random,n=>chars[n%chars.length]).join("");
+}
 function randomGroupId(){return crypto.randomUUID().replaceAll("-","").slice(0,24);}
 async function loadGroup(gid){
   cleanup(); groupId=gid;
@@ -214,7 +220,10 @@ $("itineraryForm").addEventListener("submit",e=>{
   if(!origin||!destination){toast("Inserisci partenza e destinazione.");return;}
   const params=new URLSearchParams({api:"1",origin,destination,travelmode:"driving"});
   const waypoints=$("routeWaypoints").value.trim();
-  if(waypoints)params.set("waypoints",waypoints.split(";").map(x=>x.trim()).filter(Boolean).join("|"));
+  const stops=waypoints.split(";").map(x=>x.trim()).filter(Boolean);
+  // Maps URLs: su browser Android supporta al massimo tre tappe intermedie.
+  if(stops.length>3){toast("Su Android Google Maps supporta fino a 3 tappe: apri le singole giornate.");return;}
+  if(stops.length)params.set("waypoints",stops.join("|"));
   window.open("https://www.google.com/maps/dir/?"+params.toString(),"_blank","noopener");
 });
 
