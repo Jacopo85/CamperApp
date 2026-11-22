@@ -3,7 +3,7 @@ import {DEADLINE_CATEGORIES,DEADLINE_LEADS,validDeadlineDate,daysUntilDeadline,d
 
 // Lo scadenzario usa groups/{groupId}/settings/deadlines: raccolta già autorizzata.
 // Niente Cloud Functions, nessun permesso Firebase aggiuntivo.
-export function createDeadlineUI({db,getUser,getGroup,canWrite,onToast,onWriteFailure,onWriteSuccess,onOpenVehicle}){
+export function createDeadlineUI({db,getUser,getGroup,canWrite,onToast,onWriteFailure,onWriteSuccess,onOpenVehicle,onSync=()=>{}}){
   const $=id=>document.getElementById(id);
   let group=null,unsubscribe=null,entries=[],loaded=false,editing=null,busy=false;
   const pendingNotifications=new Set();
@@ -198,19 +198,22 @@ export function createDeadlineUI({db,getUser,getGroup,canWrite,onToast,onWriteFa
     disconnect();
     group=groupId;
     $("deadlineSyncState").textContent="Caricamento scadenze condivise…";
+    onSync(null);
     const reference=doc(db,"groups",groupId,"settings","deadlines");
     unsubscribe=onSnapshot(reference,{includeMetadataChanges:true},snapshot=>{
       if(group!==groupId)return;
       const raw=snapshot.exists()&&Array.isArray(snapshot.data().items)?snapshot.data().items:[];
       entries=raw.map(cleanDeadline).filter(item=>item&&item.id);
       loaded=true;
+      const synced=!snapshot.metadata.fromCache&&!snapshot.metadata.hasPendingWrites;
+      onSync(synced);
       $("deadlineSyncState").textContent=snapshot.metadata.fromCache||snapshot.metadata.hasPendingWrites
         ?"Scadenze da copia locale · sincronizzazione da verificare"
         :"Scadenze sincronizzate tra i dispositivi";
       render();void maybeNotify();
     },error=>{
       if(group!==groupId)return;
-      loaded=false;
+      loaded=false;onSync(false,true);
       $("deadlineSyncState").textContent="Impossibile sincronizzare le scadenze: "+error.message;
     });
   }
