@@ -2,26 +2,34 @@
 /* Un riferimento a un'area ricettiva non determina permessi di sosta stradale. */
 export const normeRegionali = {
   "Valle d’Aosta": {
-    "stato": "Non verificata a livello regionale",
-    "dettaglio": "La fonte regionale consultata classifica campeggi e aree attrezzate, ma non permette di dedurre la disciplina della sosta o del campeggio libero per il singolo luogo.",
-    "limiti": "Resta da verificare la disciplina del singolo Comune, delle aree protette e dell'area di sosta interessata. Le regole sulle strutture autorizzate non equivalgono a un permesso generale di campeggio libero.",
+    "stato": "Riferimento regionale alle strutture all'aperto: LR 8/2002; sosta libera e norme locali da verificare",
+    "dettaglio": "La Regione Valle d'Aosta rende disponibile la LR 24 giugno 2002 n. 8 sui complessi ricettivi all'aperto e riconosce le aree attrezzate di sosta autocaravan tra le attività ricettive. Le disposizioni sulle strutture turistiche non attribuiscono un diritto di pernottamento o campeggio libero in qualsiasi parcheggio.",
+    "limiti": "Verificare il testo vigente, le norme specifiche di ciascun Comune, i vincoli di parchi e zone montane, gli orari e l'accessibilità delle strutture.",
     "verificatoIl": "22/11/2026",
     "fonti": [
       {
-        "titolo": "Regione Valle d'Aosta – glossario strutture ricettive",
-        "url": "https://www.regione.vda.it/statistica/pubblicazioni/annuari/annuario2025/SITE/GLOSSARI.HTM"
+        "titolo": "Regione Valle d'Aosta – documentazione strutture ricettive, LR 8/2002",
+        "url": "https://www.regione.vda.it/asstur/strutture/documentazione_i.asp"
+      },
+      {
+        "titolo": "Regione Valle d'Aosta – attività ricettive e aree sosta autocaravan",
+        "url": "https://www.regione.vda.it/asstur/agevolazionituristicoricettive/default_i.aspx"
       }
     ]
   },
   "Piemonte": {
-    "stato": "Riferimento regionale sulle aree del turismo itinerante",
-    "dettaglio": "La Regione descrive aree attrezzate, camper service e punti sosta; le modalità d'uso degli specifici punti sosta e il loro regolamento dipendono dagli enti competenti.",
-    "limiti": "Resta da verificare la disciplina del singolo Comune, delle aree protette e dell'area di sosta interessata. Le regole sulle strutture autorizzate non equivalgono a un permesso generale di campeggio libero.",
+    "stato": "Disciplina regionale delle aree per turismo itinerante: LR 5/2019, art. 8",
+    "dettaglio": "La Regione Piemonte disciplina, attraverso la LR 5/2019, le aree del turismo itinerante, distinguendo aree sosta e camper service; i Comuni e gli enti locali promuovono aree e servizi dedicati. L'esistenza di queste categorie non autorizza un campeggio libero in qualsiasi parcheggio.",
+    "limiti": "Controllare i regolamenti del Comune e del gestore, la classificazione della singola area e le prescrizioni di accesso, di durata e di scarico.",
     "verificatoIl": "22/11/2026",
     "fonti": [
       {
         "titolo": "Regione Piemonte – aree per il turismo itinerante",
         "url": "https://www.regione.piemonte.it/web/temi/cultura-turismo-sport/turismo/offerta-ricettiva/aree-per-turismo-itinerante"
+      },
+      {
+        "titolo": "Regione Piemonte – bando attuativo LR 5/2019, art. 8",
+        "url": "https://bandi.regione.piemonte.it/contributi-finanziamenti/aree-di-sosta"
       }
     ]
   },
@@ -178,11 +186,20 @@ export const normeRegionali = {
     ]
   },
   "Molise": {
-    "stato": "Non verificata a livello regionale",
-    "dettaglio": "Non è stato individuato un testo regionale sufficientemente preciso per autorizzare o vietare specifiche forme di sosta in camper. Controllare l'ente locale e la classificazione delle strutture.",
-    "limiti": "Resta da verificare la disciplina del singolo Comune, delle aree protette e dell'area di sosta interessata. Le regole sulle strutture autorizzate non equivalgono a un permesso generale di campeggio libero.",
+    "stato": "Testi normativi regionali individuati: legge 5/2001 e modifiche 10/2008; verificare il testo vigente",
+    "dettaglio": "La legge regionale 21 marzo 2001 n. 5 disciplina e classifica campeggi, villaggi turistici e aree di sosta. La legge 21 aprile 2008 n. 10 ne modifica alcune disposizioni. Questi testi riguardano le strutture turistiche: non autorizzano a campeggiare o pernottare liberamente su qualsiasi parcheggio stradale.",
+    "limiti": "Le fonti consultate sono i testi pubblicati in Gazzetta Ufficiale: la ricognizione delle modifiche successive e dei regolamenti comunali non è completa. Verificare l'area scelta, le regole della costa e delle aree protette.",
     "verificatoIl": "22/11/2026",
-    "fonti": []
+    "fonti": [
+      {
+        "titolo": "Gazzetta Ufficiale – Molise LR 5/2001 (testo pubblicato)",
+        "url": "https://www.gazzettaufficiale.it/atto/regioni/caricaDettaglioAtto/originario?atto.codiceRedazionale=001R0346&atto.dataPubblicazioneGazzetta=2001-09-15"
+      },
+      {
+        "titolo": "Gazzetta Ufficiale – Molise LR 10/2008 (modifiche)",
+        "url": "https://www.gazzettaufficiale.it/atto/regioni/caricaDettaglioAtto/originario?atto.codiceRedazionale=008R0344&atto.dataPubblicazioneGazzetta=2008-09-20"
+      }
+    ]
   },
   "Campania": {
     "stato": "Legge regionale 14/2023 sulle aree sosta",
@@ -209,44 +226,62 @@ export const normeRegionali = {
     ]
   },
   "Basilicata": {
-    "stato": "Non verificata a livello regionale",
-    "dettaglio": "È stata trovata una comunicazione regionale sul turismo itinerante, non una disposizione normativa sufficiente per classificare sosta libera e campeggio.",
-    "limiti": "Resta da verificare la disciplina del singolo Comune, delle aree protette e dell'area di sosta interessata. Le regole sulle strutture autorizzate non equivalgono a un permesso generale di campeggio libero.",
-    "verificatoIl": "22/11/2026",
-    "fonti": []
-  },
-  "Calabria": {
-    "stato": "Non verificata a livello regionale",
-    "dettaglio": "Non risultano, tra le fonti esaminate, indicazioni normative sufficienti per stabilire diritti o divieti regionali sulla sosta e sul campeggio in autocaravan.",
-    "limiti": "Resta da verificare la disciplina del singolo Comune, delle aree protette e dell'area di sosta interessata. Le regole sulle strutture autorizzate non equivalgono a un permesso generale di campeggio libero.",
-    "verificatoIl": "22/11/2026",
-    "fonti": []
-  },
-  "Sicilia": {
-    "stato": "Riferimento regionale LR 6/2025 sulle aree di sosta",
-    "dettaglio": "L'art. 24 della LR 6/2025 distingue aree di sosta e aree attrezzate di sosta temporanea per camper e caravan. Non confondere i limiti applicabili a queste strutture con la sosta su strada.",
-    "limiti": "Resta da verificare la disciplina del singolo Comune, delle aree protette e dell'area di sosta interessata. Le regole sulle strutture autorizzate non equivalgono a un permesso generale di campeggio libero.",
+    "stato": "Riferimento regionale individuato: legge 6/2008 sulle strutture ricettive, da aggiornare rispetto a modifiche successive",
+    "dettaglio": "La LR Basilicata 4 giugno 2008 n. 6 disciplina le strutture ricettive e include campeggi e aree attrezzate di sosta temporanea per caravan, autocaravan e camper. Il documento istituzionale consultato presenta le aree attrezzate come tipologia distinta dai campeggi. La disciplina delle strutture non autorizza il campeggio libero su strade, piazze o terreni.",
+    "limiti": "Il materiale del Consiglio regionale è una ricostruzione del testo del 2008 e non un testo coordinato aggiornato; per la situazione vigente, i divieti locali e i parcheggi occorre verifica presso Regione e Comune.",
     "verificatoIl": "22/11/2026",
     "fonti": [
       {
-        "titolo": "Regione Sicilia – D.A. 2104/2025 e riferimenti alla LR 6/2025",
-        "url": "https://www.regione.sicilia.it/sites/default/files/2025-06/D.%20A.%20n.%202104%20del%2025.06.2025_signed.pdf"
+        "titolo": "Consiglio regionale Basilicata – sintesi LR 6/2008 (p. 47)",
+        "url": "https://consiglio.basilicata.it/archivio-news/files/docs/15/44/64/DOCUMENT_FILE_154464.pdf"
+      }
+    ]
+  },
+  "Calabria": {
+    "stato": "Legge regionale specifica sulle aree camper verificata: LR 32/2024, art. 2",
+    "dettaglio": "La legge regionale Calabria 7 agosto 2024 n. 32 permette ai Comuni di istituire aree attrezzate riservate alla sosta di autocaravan e caravan. L'art. 2, commi 8-9, prevede in tali aree un limite di 48 ore, che non si applica nelle aree prive di attività di campeggio. Le aree devono prevedere, tra l'altro, un pozzetto per lo scarico e l'erogazione di acqua potabile. Il limite delle 48 ore non va esteso ai normali parcheggi stradali.",
+    "limiti": "L'esistenza della legge non garantisce che il singolo Comune abbia istituito un'area e neppure che un parcheggio generico consenta pernottamento. Verificare segnaletica, gestione, disponibilità, requisiti dimensionali e eventuali norme successive.",
+    "verificatoIl": "22/11/2026",
+    "fonti": [
+      {
+        "titolo": "Regione Calabria – normativa sulle strutture ricettive (LR 32/2024)",
+        "url": "https://www.regione.calabria.it/cultura-turismo-ed-eventi/strutture-ricettive/"
       },
       {
-        "titolo": "Gazzetta Ufficiale – testo LR Sicilia 6/2025, art. 24",
-        "url": "https://www.gazzettaufficiale.it/eli/gu/2025/12/27/51/s3/pdf"
+        "titolo": "Consiglio regionale Calabria – LR 32/2024, artt. 2-4",
+        "url": "https://www.consiglioregionale.calabria.it/upload/testicoordinati/2024-32_2024-08-07.pdf"
+      }
+    ]
+  },
+  "Sicilia": {
+    "stato": "Legge regionale 6/2025, art. 23, con espresso divieto di campeggio fuori dalle aree previste",
+    "dettaglio": "L'art. 23, comma 4, della LR Sicilia 25 febbraio 2025 n. 6 vieta il campeggio con tende, caravan, autocaravan o mezzi simili al di fuori delle strutture turistico-ricettive all'aperto, delle aree attrezzate di sosta temporanea, delle aree predisposte presso altri servizi ai viaggiatori e delle ulteriori aree individuate dai Comuni. Questo divieto sul campeggio non implica da solo un divieto di regolare parcheggio stradale ai sensi dell'art. 185 CdS.",
+    "limiti": "Controllare l'applicazione al luogo concreto, le ordinanze comunali, l'individuazione di aree autorizzate e le eventuali modifiche normative successive. Il pernottamento in sosta senza attività esterna e il campeggio vanno distinti.",
+    "verificatoIl": "22/11/2026",
+    "fonti": [
+      {
+        "titolo": "Gazzetta Ufficiale – Sicilia LR 6/2025, art. 23",
+        "url": "https://www.gazzettaufficiale.it/atto/regioni/caricaArticolo?art.codiceRedazionale=25R00096&art.dataPubblicazioneGazzetta=2025-12-27&art.idArticolo=23&art.idGruppo=3&art.idSottoArticolo=1&art.progressivo=0&art.versione=1"
+      },
+      {
+        "titolo": "Regione Sicilia – D.A. 2104/2025 sulle strutture ricettive",
+        "url": "https://www.regione.sicilia.it/sites/default/files/2025-06/D.%20A.%20n.%202104%20del%2025.06.2025_signed.pdf"
       }
     ]
   },
   "Sardegna": {
-    "stato": "Riferimenti regionali a aree di sosta turistica",
-    "dettaglio": "La Regione ha previsto nuove misure e direttive per le aree di sosta temporanea per camper e caravan; l'utilizzo concreto dipende dalle aree autorizzate e dalle prescrizioni comunali.",
-    "limiti": "Resta da verificare la disciplina del singolo Comune, delle aree protette e dell'area di sosta interessata. Le regole sulle strutture autorizzate non equivalgono a un permesso generale di campeggio libero.",
+    "stato": "Legge regionale 7/2022 su aree attrezzate: 72 ore, con deroga limitata a 120 ore",
+    "dettaglio": "La LR Sardegna 11 aprile 2022 n. 7 modifica l'art. 21 della LR 16/2017. Per le aree attrezzate di sosta temporanea a fini turistici prevede una sosta occasionale fino a 72 ore consecutive; una quota non superiore al 30% delle piazzole può consentire permanenze fino a 120 ore. Le aree devono prevedere dotazioni tra cui pozzetto di scarico e acqua potabile. Questi limiti riguardano le aree attrezzate della legge, NON tutti i parcheggi stradali.",
+    "limiti": "Controllare regolamento comunale e della specifica area, aperture, eventuali cambi normativi successivi e le restrizioni ambientali e costiere.",
     "verificatoIl": "22/11/2026",
     "fonti": [
       {
-        "titolo": "Regione Sardegna – aree di sosta temporanea",
-        "url": "https://www.regione.sardegna.it/notizie/34-giunta-regionale-le-delibere-adottate"
+        "titolo": "Regione Sardegna – LR 7/2022, art. 1 (testo PDF)",
+        "url": "https://www.regione.sardegna.it/documenti/1_38_20220512101253.pdf"
+      },
+      {
+        "titolo": "Regione Sardegna – scheda ufficiale della LR 7/2022",
+        "url": "https://www.regione.sardegna.it/regione/leggi-e-delibere/leggi-regionali/legge-regionale-11-aprile-2022-n-7"
       }
     ]
   }
