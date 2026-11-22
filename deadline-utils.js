@@ -36,7 +36,7 @@ export function formatDeadlineDate(date){
   return d+"/"+m+"/"+y;
 }
 function icsEscape(value){
-  return String(value??"").replace(/\\/g,"\\\\").replace(/\r?\n/g,"\\n").replace(/,/g,"\\,").replace(/;/g,"\\;");
+  return String(value??"").replace(/\\/g,"\\\\").replace(/\r\n|\r|\n/g,"\\n").replace(/,/g,"\\,").replace(/;/g,"\\;");
 }
 function icsDate(date){
   return date.replaceAll("-","");
@@ -51,16 +51,25 @@ function icsTimestamp(date){
   return d.toISOString().replace(/[-:]/g,"").replace(/\.\d{3}/,"");
 }
 function foldICalLine(line){
-  const chars=Array.from(line),out=[];
-  while(chars.length){out.push((out.length?" ":"")+chars.splice(0,out.length?68:69).join(""));}
-  return out.join("\r\n");
+  // RFC 5545: ogni riga logica va ripiegata entro 75 ottetti UTF-8.
+  const encoder=new TextEncoder();
+  let result="",chunk="",bytes=0;
+  for(const char of line){
+    const count=encoder.encode(char).length;
+    if(bytes+count>75){
+      result+=chunk+"\r\n";
+      chunk=" ";bytes=1;
+    }
+    chunk+=char;bytes+=count;
+  }
+  return result+chunk;
 }
 export function deadlineIcs(items,now=new Date()){
   const valid=(Array.isArray(items)?items:[]).map(cleanDeadline).filter(Boolean);
   const lines=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//CamperApp Family//Scadenzario//IT","CALSCALE:GREGORIAN","METHOD:PUBLISH"];
   for(const entry of valid){
     const description="Scadenza del camper. Preavviso richiesto: "+entry.leadDays+" giorni."+(entry.notes?" Note: "+entry.notes:"");
-    const uid=(entry.id.replace(/[^a-zA-Z0-9-]/g,"")||"scadenza")+"-"+icsDate(entry.date)+"@camperapp-family";
+    const uid=(entry.id.replace(/[^a-zA-Z0-9-]/g,"")||"scadenza")+"@camperapp-family";
     lines.push("BEGIN:VEVENT");
     lines.push("UID:"+uid);
     lines.push("DTSTAMP:"+icsTimestamp(now));
