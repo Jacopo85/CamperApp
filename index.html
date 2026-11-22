@@ -58,6 +58,7 @@
         <button class="tab" data-tab="shopping">Spesa</button>
         <button class="tab" data-tab="wishlist">Mete</button>
         <button class="tab" data-tab="vehicle">Camper</button>
+        <button id="deadlinesShortcut" class="tab" type="button">📅 Scadenze</button>
         <button class="tab" data-tab="itinerary">Itinerario</button>
         <button class="tab" data-tab="guide">Europa</button>
       </nav>
@@ -71,7 +72,8 @@
         <div class="dashboard-grid">
           <button class="dash-card" data-goto="shopping"><span>🛒</span><strong>Lista della spesa</strong><small id="shoppingSummary">Caricamento…</small></button>
           <button class="dash-card" data-goto="wishlist"><span>📍</span><strong>Mete dei desideri</strong><small id="wishlistSummary">Caricamento…</small></button>
-          <button class="dash-card" data-goto="vehicle"><span>🚐</span><strong>Profilo camper</strong><small id="deadlineHomeSummary">Dimensioni e scadenze</small></button>
+          <button class="dash-card" data-goto="vehicle"><span>🚐</span><strong>Profilo camper</strong><small>Dimensioni e limiti</small></button>
+          <button id="homeDeadlinesShortcut" class="dash-card" type="button"><span>📅</span><strong>Scadenzario camper</strong><small id="deadlineHomeSummary">Bollo, assicurazione, tagliando e revisione</small></button>
           <button class="dash-card" data-goto="guide"><span>🌍</span><strong>Europa in camper</strong><small>Norme da verificare e mete consigliate</small></button>
           <button class="dash-card" data-goto="itinerary"><span>🧭</span><strong>Pianifica itinerario</strong><small>Partenza automatica o manuale</small></button>
           <a class="dash-card link-card" href="https://www.google.com/maps" target="_blank" rel="noopener"><span>🗺️</span><strong>Apri Google Maps</strong><small>La navigazione parte dal telefono collegato ad Android Auto</small></a>
@@ -196,7 +198,7 @@
           <label>Massa massima autorizzata (kg)<input id="vehicleMass" type="number" step="1" min="0" value="3500" required></label>
           <button type="submit">Salva dati camper</button>
         </form>
-        <div class="card camper-deadlines">
+        <div id="camperDeadlines" class="card camper-deadlines">
           <h3>📅 Scadenzario del camper</h3>
           <p class="muted">Bollo, assicurazione, tagliando, revisione, manutenzioni e altre scadenze condivise. Inserisci le date reali: non vengono calcolate automaticamente.</p>
           <form id="deadlineForm" class="deadline-form">
@@ -226,7 +228,7 @@
         </div>
         <div class="notice warning"><strong>Importante</strong><p>Queste misure sono promemoria per valutare soste e itinerari. La prima versione non calcola percorsi stradali certificati per camper e non può garantire che una strada sia transitabile.</p></div>
       </section>
-      <footer class="app-footer">CamperApp Family · versione 17 · <span id="userLabel"></span></footer>
+      <footer class="app-footer">CamperApp Family · versione 18 · <span id="userLabel"></span></footer>
     </section>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
