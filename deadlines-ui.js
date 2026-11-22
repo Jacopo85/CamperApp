@@ -104,8 +104,8 @@ export function createDeadlineUI({db,getUser,getGroup,canWrite,onToast,onWriteFa
     $("deadlineNotificationState").textContent="Calendario esportato. Apri il file .ics, importalo nel calendario Android e verifica il promemoria. L'esportazione non sincronizza automaticamente gli aggiornamenti successivi.";
   }
   async function mutateDeadline(id,newValue){
-    if(busy||!loaded||!group||!getUser())return;
-    if(!canWrite())return;
+    if(busy||!loaded||!group||!getUser())return false;
+    if(!canWrite())return false;
     const targetGroup=group,userId=getUser().uid;
     busy=true;$("deadlineSaveBtn").disabled=true;
     try{
@@ -129,7 +129,8 @@ export function createDeadlineUI({db,getUser,getGroup,canWrite,onToast,onWriteFa
       });
       if(editing===id)resetEditor();
       onWriteSuccess(newValue===null?"Scadenza eliminata.":"Scadenza salvata e condivisa.");
-    }catch(error){onWriteFailure("Scadenzario",error);}
+      return true;
+    }catch(error){onWriteFailure("Scadenzario",error);return false;}
     finally{busy=false;$("deadlineSaveBtn").disabled=false;render();}
   }
   async function submit(event){
@@ -142,8 +143,8 @@ export function createDeadlineUI({db,getUser,getGroup,canWrite,onToast,onWriteFa
       notes:$("deadlineNotes").value
     });
     if(!entry){$("deadlineSyncState").textContent="Inserisci una descrizione e una data di scadenza valida.";return;}
-    await mutateDeadline(id,entry);
-    if(!editing)resetEditor();
+    const saved=await mutateDeadline(id,entry);
+    if(saved)resetEditor();
   }
   async function maybeNotify(){
     if(!group||!loaded||document.visibilityState==="hidden")return;
@@ -166,8 +167,7 @@ export function createDeadlineUI({db,getUser,getGroup,canWrite,onToast,onWriteFa
         try{
           await registration.showNotification("Scadenza camper: "+entry.category,{
             body:entry.title+" · "+formatDeadlineDate(entry.date)+" · "+deadlineState(entry).text,
-            tag:"camperapp-deadline-"+entry.id,
-            icon:"./icon-192.png"
+            tag:"camperapp-deadline-"+entry.id
           });
           try{localStorage.setItem(key,"shown");}catch{}
         }catch(error){console.warn("Avviso scadenza non disponibile:",error);}
