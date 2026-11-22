@@ -32,3 +32,12 @@ La lettura di `firestore.rules` del repository indica che:
 
 ## Limiti confermati
 Le 66 schede normative europee sono una base documentale, non una certificazione di ogni ordinanza locale. Non è disponibile un motore gratuito di routing certificato per i vincoli di altezza (2,95 m), larghezza (2,32 m), lunghezza (7,38 m) e massa (3.500 kg). I risultati esterni di ricerca e la geolocalizzazione in background non sono garantiti.
+
+## Esito dei controlli su codice del 22/11/2026
+- Sintassi di `app.js`, `route-geo.js` e `sw.js`: superata.
+- Verifica di tutti gli identificatori UI utilizzati da `app.js`: nessun ID assente o duplicato nell'HTML.
+- Verifica simulata: proposta di 3 giorni con 3 mete, ricerca esterna di eventi, link di navigazione su Google Maps, coordinate con virgola decimale e avviso di vicinanza: superata.
+- Verifica simulata dell'interruzione del monitoraggio quando l'app passa in secondo piano: superata.
+- Verifica delle funzioni geografiche: input GPS non validi rifiutati; stime in linea d'aria e riordino per prossimità coerenti in casi di prova.
+- Verifica che `firestore.rules` resti identico al ramo `main` precedente: superata.
+- **Non effettuato:** test live su tablet/smartphone, test autorizzazioni Firestore di produzione, test di consegna notifiche in background (non promesse), verifica automatica della presenza degli eventi o dei servizi realmente aperti.
