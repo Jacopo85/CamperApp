@@ -266,6 +266,10 @@ $("nearbyStart").addEventListener("click",()=>{
   }catch(error){stopNearbyMonitoring("Impossibile attivare il GPS: "+error.message);}
 });
 $("nearbyStop").addEventListener("click",()=>stopNearbyMonitoring("Monitoraggio GPS interrotto."));
+// Se la PWA passa in secondo piano, interrompi il GPS: no consumo nascosto e no allarmi promessi in background.
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="hidden"&&nearbyWatchId!==null)stopNearbyMonitoring("Monitoraggio sospeso: riapri CamperApp e riattivalo.");
+});
 
 function updateSummaries(){
   const unchecked=shoppingCache.filter(x=>!x.checked).length;
