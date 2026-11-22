@@ -415,14 +415,43 @@ function planSearchLink(label,place){
   const a=document.createElement("a");
   a.href="https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(label+" vicino a "+place);
   a.target="_blank";a.rel="noopener";
-  a.textContent=label;
+  a.textContent=label+" · "+place;
   return a;
+}
+function dayDate(index){
+  const value=$("planStartDate").value;
+  if(!/^\d{4}-\d\d-\d\d$/.test(value))return null;
+  const date=new Date(value+"T12:00:00Z");
+  if(Number.isNaN(date.getTime()))return null;
+  date.setUTCDate(date.getUTCDate()+index);
+  return date.toISOString().slice(0,10);
+}
+function planEventsLink(place,date){
+  const a=document.createElement("a");
+  const query="sagre feste eventi in programma "+place+" "+(date||"");
+  a.href="https://www.google.com/search?q="+encodeURIComponent(query);
+  a.target="_blank";a.rel="noopener";
+  a.textContent="🎉 Cerca eventi e sagre"+(date?" · "+date:"")+" · "+place;
+  return a;
+}
+function openDayDirections(dayIndex){
+  const places=plannedDays[dayIndex]||[];
+  const locations=places.map(planPlaceLocation).filter(Boolean);
+  if(!locations.length){toast("Giornata senza mete.");return;}
+  if(locations.length>4){toast("Riduci a massimo 4 mete per usare Google Maps su Android.");return;}
+  const previous=plannedDays.slice(0,dayIndex).flat().map(planPlaceLocation).filter(Boolean);
+  const origin=dayIndex===0?$("routeOrigin").value.trim():previous[previous.length-1]||"";
+  const params=new URLSearchParams({api:"1",destination:locations[locations.length-1],travelmode:"driving"});
+  if(origin)params.set("origin",origin);
+  if(locations.length>1)params.set("waypoints",locations.slice(0,-1).join("|"));
+  window.open("https://www.google.com/maps/dir/?"+params.toString(),"_blank","noopener");
 }
 function renderTripPlan(){
   const results=$("planResults");results.replaceChildren();
   plannedDays.forEach((places,dayIndex)=>{
     const section=document.createElement("section");section.className="route-plan-day";
-    const title=document.createElement("strong");title.textContent="Giorno "+(dayIndex+1);
+    const date=dayDate(dayIndex);
+    const title=document.createElement("strong");title.textContent="Giorno "+(dayIndex+1)+(date?" · "+date:"");
     section.appendChild(title);
     if(!places.length){
       const empty=document.createElement("p");empty.className="muted small";
@@ -432,7 +461,10 @@ function renderTripPlan(){
     places.forEach((place,index)=>{
       const item=document.createElement("div");item.className="route-plan-place";
       const label=document.createElement("span");
-      label.textContent=place.name+(place.address?" — "+place.address:"");
+      const earlier=index?places[index-1]:plannedDays.slice(0,dayIndex).flat().slice(-1)[0];
+      const km=earlier?gpsDistanceKm(earlier,place):null;
+      label.textContent=place.name+(place.address?" — "+place.address:"")+
+        (km!==null?" · circa "+km.toFixed(1)+" km in linea d’aria dalla tappa precedente":"");
       item.appendChild(label);
       const controls=document.createElement("div");controls.className="route-place-buttons";
       const add=(caption,disabled,action)=>{
@@ -447,14 +479,23 @@ function renderTripPlan(){
       add("Escludi",false,()=>{places.splice(index,1);renderTripPlan();});
       item.appendChild(controls);section.appendChild(item);
     });
-    const locality=places.map(planPlaceLocation).find(Boolean);
-    if(locality){
+    if(places.length){
+      const nav=document.createElement("button");
+      nav.type="button";nav.className="secondary compact";
+      nav.textContent="🗺️ Apri questa giornata in Google Maps";
+      nav.addEventListener("click",()=>openDayDirections(dayIndex));
+      section.appendChild(nav);
       const searches=document.createElement("div");searches.className="route-plan-searches";
-      searches.append(
-        planSearchLink("🏕️ Campeggi",locality),
-        planSearchLink("🚐 Aree sosta",locality),
-        planSearchLink("💧 Carico/scarico e WC",locality)
-      );
+      places.forEach(place=>{
+        const locality=planPlaceLocation(place);
+        if(!locality)return;
+        searches.append(
+          planSearchLink("🏕️ Campeggi",locality),
+          planSearchLink("🚐 Aree sosta",locality),
+          planSearchLink("💧 Carico/scarico e WC",locality),
+          planEventsLink(locality,date)
+        );
+      });
       section.appendChild(searches);
     }
     results.appendChild(section);
@@ -491,8 +532,13 @@ function generateTripPlan(){
   }
   // Massimo due mete per giornata: è una distribuzione indicativa, non basata sulle distanze.
   plannedDays=Array.from({length:days},()=>[]);
-  matches.slice(0,days*2).forEach((place,i)=>plannedDays[Math.floor(i/2)].push(place));
-  status.textContent="Trovate "+matches.length+" mete, ordinate prima per località e poi per priorità; inserite "+Math.min(matches.length,days*2)+" nella bozza. La vicinanza geografica reale non è verificata: distanze e tempi non sono calcolati.";
+  const selected=matches.slice(0,days*2);
+  const located=selected.filter(place=>gpsPoint(place)).length;
+  const ordered=located>=2?arrangeByAirDistance(selected,gpsOrigin($("routeOrigin").value)):selected;
+  ordered.forEach((place,i)=>plannedDays[Math.floor(i/2)].push(place));
+  status.textContent="Trovate "+matches.length+" mete; selezionate "+selected.length+". Mete con coordinate: "+located+". "+
+    (located>=2?"Ordine geografico indicativo calcolato per distanze in linea d'aria, NON su strada.":"Ordine per località e priorità: servono almeno due mete GPS per calcolare le distanze.")+
+    " Per viaggi su Android apri Google Maps giornata per giornata. Eventi e servizi sono ricerche esterne da verificare.";
   renderTripPlan();
 }
 function applyTripPlan(){
@@ -502,7 +548,7 @@ function applyTripPlan(){
   if(locations.length>10){toast("Troppe tappe per il percorso: riduci la proposta prima di applicarla.");return;}
   $("routeDestination").value=locations[locations.length-1];
   $("routeWaypoints").value=locations.slice(0,-1).join("; ");
-  toast("Tappe trasferite al percorso. Controlla la partenza e verifica l'ordine.");
+  toast(locations.length>4?"Tappe trasferite: su Android apri ogni giornata separatamente.":"Tappe trasferite. Controlla partenza e ordine.");
 }
 $("planGenerateBtn").addEventListener("click",generateTripPlan);
 $("planApplyBtn").addEventListener("click",applyTripPlan);
