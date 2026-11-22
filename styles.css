@@ -33,3 +33,14 @@
 #planApplyBtn{margin-top:12px}
 
 .route-plan-notes{grid-column:1/-1;display:flex;align-items:center;gap:8px}.route-plan-notes input{width:20px;min-height:20px;flex:none}
+
+/* Vademecum: evidenza regionale prima dei principi nazionali */
+.guide-legal-summary{padding:12px;border-left:3px solid #4b8875;background:var(--soft,#f2f6f3);border-radius:0 8px 8px 0;line-height:1.55}
+.guide-details{margin:15px 0;padding:10px 12px;border:1px solid #d5dfda;border-radius:9px}
+.guide-details summary{cursor:pointer;font-weight:650;line-height:1.5}
+.guide-details[open] summary{margin-bottom:12px}
+.guide-sources{padding-left:22px;overflow-wrap:anywhere}
+.guide-sources li{margin:7px 0}
+
+/* Ricerca manuale delle ordinanze locali, senza richieste API o dati Firebase */
+.guide-local-card{margin-top:14px}.guide-local-card .route-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.guide-local-card input{flex:1;min-width:190px;min-height:40px}
