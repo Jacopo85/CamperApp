@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebas
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, addDoc, collection, onSnapshot, updateDoc, deleteDoc, serverTimestamp, query, orderBy, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
+import { gpsPoint, gpsDistanceKm, arrangeByAirDistance, gpsOrigin } from "./route-geo.js";
 
 const $ = id => document.getElementById(id);
 const app = initializeApp(firebaseConfig);
@@ -21,6 +22,7 @@ function writeNotice(text){
   notice.classList.toggle("hidden",!text);
 }
 function canWrite(){
+  if(!currentUser||!groupId){toast("Accedi al gruppo familiare prima di modificare i dati.");return false;}
   if(navigator.onLine)return true;
   writeNotice("Salvataggio non avviato: sei offline. Riconnettiti e riprova; la modifica non è stata inviata.");
   toast("Offline: operazione non avviata.");
@@ -73,15 +75,14 @@ async function restoreCurrentGroup(){
       :friendlyError(e));
   }finally{restoreInProgress=false;}
 }
-function cleanup(){[unsubShopping,unsubWishlist,unsubGroup,unsubVehicle].forEach(fn=>{if(fn)fn();});unsubShopping=unsubWishlist=unsubGroup=unsubVehicle=null;groupId=null;shoppingCache=[];wishlistCache=[];authorNames=new Map();shoppingSync=wishlistSync=vehicleSync=null;syncError=false;vehicleDirty=false;}
+function cleanup(){stopNearbyMonitoring();[unsubShopping,unsubWishlist,unsubGroup,unsubVehicle].forEach(fn=>{if(fn)fn();});unsubShopping=unsubWishlist=unsubGroup=unsubVehicle=null;groupId=null;shoppingCache=[];wishlistCache=[];authorNames=new Map();shoppingSync=wishlistSync=vehicleSync=null;syncError=false;vehicleDirty=false;}
 // I nomi sono associati agli UID dei membri; non viene modificato Firestore.
 function memberDisplayName(email){
-  const names={
-    "jacoporeggioli@libero.it":"Jacopo",
-    "azzurra.bellini@libero.it":"Azzurra",
-    "azzurra.bellini@gmail.com":"Camper"
-  };
-  return names[String(email||"").trim().toLowerCase()]||null;
+  // Non pubblicare nel sorgente gli indirizzi email completi degli account familiari.
+  const [local="",domain=""]=String(email||"").trim().toLowerCase().split("@");
+  if(local.startsWith("jacopo"))return "Jacopo";
+  if(local.startsWith("azzurra"))return domain==="gmail.com"?"Camper":"Azzurra";
+  return null;
 }
 function authorLabel(uid){
   return typeof uid==="string" && authorNames.has(uid)
@@ -103,7 +104,11 @@ async function loadAuthorNames(gid){
     console.warn("Nomi autori non disponibili:",err);
   }
 }
-function inviteCode(){const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let out="";for(let i=0;i<12;i++)out+=chars[Math.floor(Math.random()*chars.length)];return out;}
+function inviteCode(){
+  const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const random=new Uint8Array(12);crypto.getRandomValues(random);
+  return Array.from(random,n=>chars[n%chars.length]).join("");
+}
 function randomGroupId(){return crypto.randomUUID().replaceAll("-","").slice(0,24);}
 async function loadGroup(gid){
   cleanup(); groupId=gid;
@@ -116,7 +121,7 @@ async function loadGroup(gid){
     shoppingCache=snap.docs.map(d=>({id:d.id,...d.data()})); shoppingSync=!snap.metadata.fromCache&&!snap.metadata.hasPendingWrites;refreshSyncState();renderShopping(); updateSummaries();
   },err=>{syncError=true;refreshSyncState();toast("Errore lista spesa: "+err.message);});
   unsubWishlist=onSnapshot(query(colRef("wishlist"),orderBy("createdAt","desc")),{includeMetadataChanges:true},snap=>{
-    wishlistCache=snap.docs.map(d=>({id:d.id,...d.data()})); wishlistSync=!snap.metadata.fromCache&&!snap.metadata.hasPendingWrites;refreshSyncState();renderWishlist(); renderSavedPlaces(); updateSummaries();
+    wishlistCache=snap.docs.map(d=>({id:d.id,...d.data()})); wishlistSync=!snap.metadata.fromCache&&!snap.metadata.hasPendingWrites;refreshSyncState();renderWishlist(); renderSavedPlaces(); updateNearbyState(); updateSummaries();
   },err=>{syncError=true;refreshSyncState();toast("Errore mete: "+err.message);});
   // Ricevi gli aggiornamenti dei dati camper dagli altri dispositivi.
   unsubVehicle=onSnapshot(doc(db,"groups",gid,"settings","vehicle"),{includeMetadataChanges:true},snap=>{
@@ -137,6 +142,23 @@ function renderShopping(){
     ul.appendChild(li);
   }
 }
+function parseGpsInputs(latValue,lonValue){
+  const lat=String(latValue||"").trim().replace(",",".");
+  const lon=String(lonValue||"").trim().replace(",",".");
+  if(!lat&&!lon)return null;
+  if(!lat||!lon||!/^-?\d+(?:\.\d+)?$/.test(lat)||!/^-?\d+(?:\.\d+)?$/.test(lon)){
+    throw new Error("Inserisci entrambe le coordinate GPS in formato numerico (latitudine e longitudine).");
+  }
+  const result=gpsPoint({latitude:Number(lat),longitude:Number(lon)});
+  if(!result)throw new Error("Coordinate fuori intervallo: latitudine da -90 a 90, longitudine da -180 a 180.");
+  return result;
+}
+function gpsInput(placeholder,value){
+  const input=document.createElement("input");input.type="text";input.inputMode="decimal";
+  input.placeholder=placeholder;input.value=value??"";input.setAttribute("aria-label",placeholder);
+  input.maxLength=25;return input;
+}
+
 function renderWishlist(){
   const ul=$("wishlistList");ul.innerHTML="";
   $("wishlistEmpty").classList.toggle("hidden",wishlistCache.length>0);
@@ -146,9 +168,109 @@ function renderWishlist(){
     const mapsUrl="https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q);
     li.innerHTML=`<div class="item-main"><div class="item-title">${escapeHTML(place.name)}</div><div class="item-meta">${escapeHTML(place.address||"Località da definire")} · Priorità ${escapeHTML(place.priority||"media")}</div><div class="item-meta">${escapeHTML(authorLabel(place.createdBy))}</div>${place.notes?`<p class="muted small">${escapeHTML(place.notes)}</p>`:""}<p><a href="${mapsUrl}" target="_blank" rel="noopener">Apri in Google Maps ↗</a></p></div><div class="item-actions"><button class="icon-btn delete-btn">Elimina</button></div>`;
     li.querySelector(".delete-btn").addEventListener("click",async()=>{if(confirm(`Eliminare la meta “${place.name}”?`)&&canWrite())try{await deleteDoc(doc(db,"groups",groupId,"wishlist",place.id));toast("Meta eliminata.");}catch(err){writeFailed("Eliminazione meta",err);}});
+    const gps=gpsPoint(place);
+    const details=document.createElement("details");details.className="gps-details";
+    const summary=document.createElement("summary");
+    summary.textContent=gps?"GPS salvato: "+gps.latitude.toFixed(5)+", "+gps.longitude.toFixed(5)+" · Modifica":"Aggiungi coordinate GPS";
+    const latitudeField=gpsInput("Latitudine, es. 45.4408",gps?.latitude);
+    const longitudeField=gpsInput("Longitudine, es. 12.3155",gps?.longitude);
+    const save=document.createElement("button");save.type="button";save.className="secondary compact";save.textContent="Salva coordinate";
+    const note=document.createElement("small");note.className="muted";note.textContent="Lascia entrambi i campi vuoti per rimuovere il GPS. I valori sono condivisi con la famiglia.";
+    const inputs=document.createElement("div");inputs.className="gps-editor";
+    inputs.append(latitudeField,longitudeField,save,note);details.append(summary,inputs);
+    save.addEventListener("click",async()=>{
+      if(!canWrite())return;
+      try{
+        const next=parseGpsInputs(latitudeField.value,longitudeField.value);
+        await updateDoc(doc(db,"groups",groupId,"wishlist",place.id),{
+          latitude:next?.latitude??null,longitude:next?.longitude??null,updatedAt:serverTimestamp(),updatedBy:currentUser.uid
+        });
+        writeSucceeded("Coordinate della meta aggiornate.");
+      }catch(error){writeFailed("Coordinate GPS",error);}
+    });
+    li.querySelector(".item-main").appendChild(details);
+
     ul.appendChild(li);
   }
 }
+// Monitoraggio GPS volontario soltanto con CamperApp in primo piano.
+// Nessun invio di coordinate ad altri servizi e nessuna geolocalizzazione in background.
+let nearbyWatchId=null;
+let nearbySeen=new Set();
+function nearbyGpsCount(){return wishlistCache.filter(place=>gpsPoint(place)).length;}
+function updateNearbyState(){
+  const output=$("nearbyState");if(!output)return;
+  if(nearbyWatchId!==null){
+    output.textContent="Controllo GPS attivo mentre CamperApp è aperta · "+nearbyGpsCount()+" mete con coordinate.";
+  }else{
+    output.textContent="Avvisi disattivati · "+nearbyGpsCount()+" mete con coordinate GPS.";
+  }
+}
+function stopNearbyMonitoring(message){
+  if(nearbyWatchId!==null&&navigator.geolocation){
+    navigator.geolocation.clearWatch(nearbyWatchId);
+  }
+  nearbyWatchId=null;nearbySeen.clear();
+  const start=$("nearbyStart"),stop=$("nearbyStop"),status=$("nearbyState");
+  if(start)start.disabled=false;
+  if(stop)stop.disabled=true;
+  if(status)status.textContent=message||"Avvisi disattivati.";
+}
+function checkNearbyPosition(position){
+  if(document.visibilityState==="hidden")return;
+  const point={latitude:position.coords.latitude,longitude:position.coords.longitude};
+  if(!gpsPoint(point))return;
+  const radius=Number($("nearbyRadius").value);
+  const accuracy=Number(position.coords.accuracy)||0;
+  if(accuracy>radius*1000){
+    $("nearbyState").textContent="GPS troppo impreciso (±"+Math.round(accuracy)+" m). Non invio avvisi per evitare falsi allarmi.";
+    return;
+  }
+  const nearbyList=$("nearbyMatches");
+  const activeIds=new Set();
+  for(const place of wishlistCache){
+    const distance=gpsDistanceKm(point,place);
+    if(distance===null)continue;
+    if(distance<=radius){
+      activeIds.add(place.id);
+      if(!nearbySeen.has(place.id)){
+        nearbySeen.add(place.id);
+        const li=document.createElement("li");
+        li.textContent="📍 "+place.name+" a circa "+Math.round(distance*1000)+" metri (in linea d’aria)";
+        nearbyList.prepend(li);
+        while(nearbyList.children.length>6)nearbyList.lastChild.remove();
+        toast("Meta vicina: "+place.name);
+      }
+    }else if(distance>radius*1.5){
+      nearbySeen.delete(place.id);
+    }
+  }
+  $("nearbyState").textContent="GPS attivo · precisione ±"+Math.round(accuracy)+" m · mete nel raggio: "+activeIds.size+". Il monitoraggio può fermarsi se chiudi l’app.";
+}
+$("nearbyStart").addEventListener("click",()=>{
+  if(nearbyWatchId!==null)return;
+  if(!navigator.geolocation){$("nearbyState").textContent="GPS non disponibile sul dispositivo.";return;}
+  if(!nearbyGpsCount()){$("nearbyState").textContent="Aggiungi prima le coordinate GPS ad almeno una meta salvata.";return;}
+  nearbySeen.clear();$("nearbyMatches").replaceChildren();
+  $("nearbyStart").disabled=true;$("nearbyStop").disabled=false;
+  $("nearbyState").textContent="Richiesta autorizzazione alla posizione in corso…";
+  try{
+    nearbyWatchId=navigator.geolocation.watchPosition(
+      checkNearbyPosition,
+      error=>{
+        const label={1:"Permesso posizione negato",2:"Posizione non disponibile",3:"Ricerca posizione scaduta"}[error.code]||"Errore GPS";
+        stopNearbyMonitoring(label+". Puoi riprovare dalle impostazioni del dispositivo.");
+      },
+      {enableHighAccuracy:true,maximumAge:20000,timeout:20000}
+    );
+  }catch(error){stopNearbyMonitoring("Impossibile attivare il GPS: "+error.message);}
+});
+$("nearbyStop").addEventListener("click",()=>stopNearbyMonitoring("Monitoraggio GPS interrotto."));
+// Se la PWA passa in secondo piano, interrompi il GPS: no consumo nascosto e no allarmi promessi in background.
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="hidden"&&nearbyWatchId!==null)stopNearbyMonitoring("Monitoraggio sospeso: riapri CamperApp e riattivalo.");
+});
+
 function updateSummaries(){
   const unchecked=shoppingCache.filter(x=>!x.checked).length;
   $("shoppingSummary").textContent=`${unchecked} articoli da acquistare`;
@@ -187,7 +309,14 @@ $("resetShoppingBtn").addEventListener("click",async()=>{
   try{const batch=writeBatch(db);shoppingCache.filter(x=>x.checked).forEach(item=>batch.update(doc(db,"groups",groupId,"shopping",item.id),{checked:false,updatedAt:serverTimestamp(),updatedBy:currentUser.uid}));await batch.commit();writeSucceeded("Spunte azzerate. Gli articoli restano nella lista.");}catch(err){writeFailed("Reset spunte",err);}
 });
 $("wishlistForm").addEventListener("submit",async e=>{
-  e.preventDefault();if(!canWrite())return;try{await addDoc(colRef("wishlist"),{name:$("placeName").value.trim(),address:$("placeAddress").value.trim(),priority:$("placePriority").value,notes:$("placeNotes").value.trim(),createdAt:serverTimestamp(),createdBy:currentUser.uid,updatedAt:serverTimestamp()});$("wishlistForm").reset();writeSucceeded("Meta salvata.");}catch(err){writeFailed("Salvataggio meta",err);}
+  e.preventDefault();if(!canWrite())return;
+  try{
+    const gps=parseGpsInputs($("placeLatitude").value,$("placeLongitude").value);
+    const data={name:$("placeName").value.trim(),address:$("placeAddress").value.trim(),priority:$("placePriority").value,notes:$("placeNotes").value.trim(),createdAt:serverTimestamp(),createdBy:currentUser.uid,updatedAt:serverTimestamp()};
+    if(gps)Object.assign(data,gps);
+    await addDoc(colRef("wishlist"),data);
+    $("wishlistForm").reset();writeSucceeded("Meta salvata.");
+  }catch(err){writeFailed("Salvataggio meta",err);}
 });
 $("vehicleForm").addEventListener("input",()=>{vehicleDirty=true;});
 $("vehicleForm").addEventListener("submit",async e=>{
@@ -214,7 +343,10 @@ $("itineraryForm").addEventListener("submit",e=>{
   if(!origin||!destination){toast("Inserisci partenza e destinazione.");return;}
   const params=new URLSearchParams({api:"1",origin,destination,travelmode:"driving"});
   const waypoints=$("routeWaypoints").value.trim();
-  if(waypoints)params.set("waypoints",waypoints.split(";").map(x=>x.trim()).filter(Boolean).join("|"));
+  const stops=waypoints.split(";").map(x=>x.trim()).filter(Boolean);
+  // Maps URLs: su browser Android supporta al massimo tre tappe intermedie.
+  if(stops.length>3){toast("Su Android Google Maps supporta fino a 3 tappe: apri le singole giornate.");return;}
+  if(stops.length)params.set("waypoints",stops.join("|"));
   window.open("https://www.google.com/maps/dir/?"+params.toString(),"_blank","noopener");
 });
 
@@ -286,14 +418,43 @@ function planSearchLink(label,place){
   const a=document.createElement("a");
   a.href="https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(label+" vicino a "+place);
   a.target="_blank";a.rel="noopener";
-  a.textContent=label;
+  a.textContent=label+" · "+place;
   return a;
+}
+function dayDate(index){
+  const value=$("planStartDate").value;
+  if(!/^\d{4}-\d\d-\d\d$/.test(value))return null;
+  const date=new Date(value+"T12:00:00Z");
+  if(Number.isNaN(date.getTime()))return null;
+  date.setUTCDate(date.getUTCDate()+index);
+  return date.toISOString().slice(0,10);
+}
+function planEventsLink(place,date){
+  const a=document.createElement("a");
+  const query="sagre feste eventi in programma "+place+" "+(date||"");
+  a.href="https://www.google.com/search?q="+encodeURIComponent(query);
+  a.target="_blank";a.rel="noopener";
+  a.textContent="🎉 Cerca eventi e sagre"+(date?" · "+date:"")+" · "+place;
+  return a;
+}
+function openDayDirections(dayIndex){
+  const places=plannedDays[dayIndex]||[];
+  const locations=places.map(planPlaceLocation).filter(Boolean);
+  if(!locations.length){toast("Giornata senza mete.");return;}
+  if(locations.length>4){toast("Riduci a massimo 4 mete per usare Google Maps su Android.");return;}
+  const previous=plannedDays.slice(0,dayIndex).flat().map(planPlaceLocation).filter(Boolean);
+  const origin=dayIndex===0?$("routeOrigin").value.trim():previous[previous.length-1]||"";
+  const params=new URLSearchParams({api:"1",destination:locations[locations.length-1],travelmode:"driving"});
+  if(origin)params.set("origin",origin);
+  if(locations.length>1)params.set("waypoints",locations.slice(0,-1).join("|"));
+  window.open("https://www.google.com/maps/dir/?"+params.toString(),"_blank","noopener");
 }
 function renderTripPlan(){
   const results=$("planResults");results.replaceChildren();
   plannedDays.forEach((places,dayIndex)=>{
     const section=document.createElement("section");section.className="route-plan-day";
-    const title=document.createElement("strong");title.textContent="Giorno "+(dayIndex+1);
+    const date=dayDate(dayIndex);
+    const title=document.createElement("strong");title.textContent="Giorno "+(dayIndex+1)+(date?" · "+date:"");
     section.appendChild(title);
     if(!places.length){
       const empty=document.createElement("p");empty.className="muted small";
@@ -303,7 +464,10 @@ function renderTripPlan(){
     places.forEach((place,index)=>{
       const item=document.createElement("div");item.className="route-plan-place";
       const label=document.createElement("span");
-      label.textContent=place.name+(place.address?" — "+place.address:"");
+      const earlier=index?places[index-1]:plannedDays.slice(0,dayIndex).flat().slice(-1)[0];
+      const km=earlier?gpsDistanceKm(earlier,place):null;
+      label.textContent=place.name+(place.address?" — "+place.address:"")+
+        (km!==null?" · circa "+km.toFixed(1)+" km in linea d’aria dalla tappa precedente":"");
       item.appendChild(label);
       const controls=document.createElement("div");controls.className="route-place-buttons";
       const add=(caption,disabled,action)=>{
@@ -318,14 +482,23 @@ function renderTripPlan(){
       add("Escludi",false,()=>{places.splice(index,1);renderTripPlan();});
       item.appendChild(controls);section.appendChild(item);
     });
-    const locality=places.map(planPlaceLocation).find(Boolean);
-    if(locality){
+    if(places.length){
+      const nav=document.createElement("button");
+      nav.type="button";nav.className="secondary compact";
+      nav.textContent="🗺️ Apri questa giornata in Google Maps";
+      nav.addEventListener("click",()=>openDayDirections(dayIndex));
+      section.appendChild(nav);
       const searches=document.createElement("div");searches.className="route-plan-searches";
-      searches.append(
-        planSearchLink("🏕️ Campeggi",locality),
-        planSearchLink("🚐 Aree sosta",locality),
-        planSearchLink("💧 Carico/scarico e WC",locality)
-      );
+      places.forEach(place=>{
+        const locality=planPlaceLocation(place);
+        if(!locality)return;
+        searches.append(
+          planSearchLink("🏕️ Campeggi",locality),
+          planSearchLink("🚐 Aree sosta",locality),
+          planSearchLink("💧 Carico/scarico e WC",locality),
+          planEventsLink(locality,date)
+        );
+      });
       section.appendChild(searches);
     }
     results.appendChild(section);
@@ -362,8 +535,13 @@ function generateTripPlan(){
   }
   // Massimo due mete per giornata: è una distribuzione indicativa, non basata sulle distanze.
   plannedDays=Array.from({length:days},()=>[]);
-  matches.slice(0,days*2).forEach((place,i)=>plannedDays[Math.floor(i/2)].push(place));
-  status.textContent="Trovate "+matches.length+" mete, ordinate prima per località e poi per priorità; inserite "+Math.min(matches.length,days*2)+" nella bozza. La vicinanza geografica reale non è verificata: distanze e tempi non sono calcolati.";
+  const selected=matches.slice(0,days*2);
+  const located=selected.filter(place=>gpsPoint(place)).length;
+  const ordered=located>=2?arrangeByAirDistance(selected,gpsOrigin($("routeOrigin").value)):selected;
+  ordered.forEach((place,i)=>plannedDays[Math.floor(i/2)].push(place));
+  status.textContent="Trovate "+matches.length+" mete; selezionate "+selected.length+". Mete con coordinate: "+located+". "+
+    (located>=2?"Ordine geografico indicativo calcolato per distanze in linea d'aria, NON su strada.":"Ordine per località e priorità: servono almeno due mete GPS per calcolare le distanze.")+
+    " Per viaggi su Android apri Google Maps giornata per giornata. Eventi e servizi sono ricerche esterne da verificare.";
   renderTripPlan();
 }
 function applyTripPlan(){
@@ -373,9 +551,10 @@ function applyTripPlan(){
   if(locations.length>10){toast("Troppe tappe per il percorso: riduci la proposta prima di applicarla.");return;}
   $("routeDestination").value=locations[locations.length-1];
   $("routeWaypoints").value=locations.slice(0,-1).join("; ");
-  toast("Tappe trasferite al percorso. Controlla la partenza e verifica l'ordine.");
+  toast(locations.length>4?"Tappe trasferite: su Android apri ogni giornata separatamente.":"Tappe trasferite. Controlla partenza e ordine.");
 }
 $("planGenerateBtn").addEventListener("click",generateTripPlan);
+$("planStartDate").addEventListener("change",()=>{if(plannedDays.length)renderTripPlan();});
 $("planApplyBtn").addEventListener("click",applyTripPlan);
 
 // Ricerca di strutture presso destinazione e tappe inserite.
