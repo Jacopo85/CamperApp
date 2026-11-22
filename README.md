@@ -4,6 +4,19 @@ Applicazione web privata nell'utilizzo familiare, distribuita tramite **GitHub P
 
 **Apri:** https://jacopo85.github.io/CamperApp/
 
+## Icona ufficiale (versione 20)
+
+L'icona approvata raffigura il camper e la famiglia di quattro persone (babbo, mamma, figlio maggiore e figlia minore), racchiusi in un cuore rosso in stile cartoon. È stata preparata dalla stessa immagine approvata, senza usare fotografie esterne.
+
+Le risorse pubblicate nel repository sono:
+- `icon-192.png` e `icon-512.png`: icone standard Android (web app manifest).
+- `icon-maskable-512.png`: variante con spazio protettivo per i ritagli circolari o adattivi delle schermate Home Android.
+- `apple-touch-icon.png` (180 px) e `favicon-48.png`: icone per altri browser e schede web.
+
+La PWA pubblica il proprio manifesto in `manifest.webmanifest` e memorizza le icone nella cache con `sw.js` (shell-v20). Nessuna modifica a Firebase o ai dati della famiglia.
+
+**Per far comparire la nuova icona sul tablet e sui telefoni Android:** aprire CamperApp online in Chrome, ricaricare e controllare il footer **versione 20**. La sostituzione della vecchia icona sulla schermata Home dipende dalla gestione dei collegamenti o delle app installate di Android e Chrome; può aggiornarsi automaticamente oppure essere necessario rimuovere il solo vecchio collegamento e aggiungerlo nuovamente dal menu Chrome. Se il browser indica **Installa app** invece di **Aggiungi a schermata Home**, verificare prima se l'app è già installata; non rimuovere l'app né cancellare i suoi dati solo per cambiare icona. L'icona non cambia i dati archiviati in Firestore.
+
 ## Funzioni disponibili
 
 - Account con login e gruppo familiare condiviso.
