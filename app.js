@@ -15,7 +15,7 @@ let authorNames = new Map();
 const show = (id, yes=true) => $(id).classList.toggle("hidden", !yes);
 const msg = (id, text) => { $(id).textContent = text || ""; };
 function toast(text){ const t=$("toast"); t.textContent=text; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2600); }
-const deadlines=createDeadlineUI({
+const deadlines=$("deadlineForm")?createDeadlineUI({
   db,
   getUser:()=>currentUser,
   getGroup:()=>groupId,
@@ -25,7 +25,7 @@ const deadlines=createDeadlineUI({
   onWriteSuccess:message=>writeSucceeded(message),
   onOpenVehicle:()=>switchTab("vehicle"),
   onSync:(synced,failed=false)=>{deadlineSync=synced;if(failed)syncError=true;refreshSyncState();}
-});
+}):{connect(){},disconnect(){}};
 
 function writeNotice(text){
   const notice=$("writeState");
@@ -52,7 +52,7 @@ function setSync(text){ $("syncState").textContent=text; }
 function refreshSyncState(){
   if(!navigator.onLine){setSync("Offline · modifiche non garantite");return;}
   if(syncError){setSync("Errore sincronizzazione");return;}
-  if(shoppingSync===true && wishlistSync===true && vehicleSync===true && deadlineSync===true){setSync("Dati sincronizzati");return;}
+  if(shoppingSync===true && wishlistSync===true && vehicleSync===true && (deadlineSync===true||!$("deadlineForm"))){setSync("Dati sincronizzati");return;}
   setSync("Online · sincronizzazione in corso");
 }
 window.addEventListener("online",()=>{refreshSyncState();if(currentUser&&!groupId)void restoreCurrentGroup();});
@@ -604,7 +604,7 @@ document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{
   if(b.id==="deadlinesShortcut")goToCamperDeadlines();
   else switchTab(b.dataset.tab);
 }));
-$("homeDeadlinesShortcut").addEventListener("click",goToCamperDeadlines);
+if($("homeDeadlinesShortcut"))$("homeDeadlinesShortcut").addEventListener("click",goToCamperDeadlines);
 document.querySelectorAll("[data-goto]").forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.goto)));
 onAuthStateChanged(auth,async user=>{
   cleanup();currentUser=user;show("logoutBtn",!!user);
