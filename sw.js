@@ -1,5 +1,5 @@
-const CACHE="camper-compagno-shell-v19";
-const SHELL=["./","./index.html","./styles.css","./manifest.webmanifest","./guide.js","./vademecum-data.js","./norme-sosta.js","./norme-regionali.js","./route-geo.js","./deadline-utils.js","./deadlines-ui.js","./app.js"];
+const CACHE="camper-compagno-shell-v20";
+const SHELL=["./","./index.html","./styles.css","./manifest.webmanifest","./guide.js","./vademecum-data.js","./norme-sosta.js","./norme-regionali.js","./route-geo.js","./deadline-utils.js","./deadlines-ui.js","./app.js","./icon-192.png","./icon-512.png","./icon-maskable-512.png","./apple-touch-icon.png","./favicon-48.png"];
 const FRESH_FILES=new Set(["app.js","route-geo.js","deadline-utils.js","deadlines-ui.js","guide.js","vademecum-data.js","norme-sosta.js","norme-regionali.js","styles.css","index.html","manifest.webmanifest"]);
 
 // Warm the offline shell with the newest files instead of the browser's old HTTP cache.
