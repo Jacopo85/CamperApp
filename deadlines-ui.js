@@ -1,5 +1,5 @@
 import {doc,onSnapshot,runTransaction,serverTimestamp} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-import {DEADLINE_CATEGORIES,DEADLINE_LEADS,validDeadlineDate,daysUntilDeadline,deadlineState,cleanDeadline,formatDeadlineDate,deadlineIcs} from "./deadline-utils.js";
+import {DEADLINE_CATEGORIES,DEADLINE_LEADS,validDeadlineDate,daysUntilDeadline,deadlineState,cleanDeadline,formatDeadlineDate,deadlineIcs,deadlineGoogleCalendarUrl} from "./deadline-utils.js";
 
 // Lo scadenzario usa groups/{groupId}/settings/deadlines: raccolta già autorizzata.
 // Niente Cloud Functions, nessun permesso Firebase aggiuntivo.
@@ -23,7 +23,7 @@ export function createDeadlineUI({db,getUser,getGroup,canWrite,onToast,onWriteFa
     if(enabled&&("Notification" in window)&&Notification.permission==="granted"){
       $("deadlineNotificationState").textContent="Avvisi web abilitati su questo dispositivo, solo con CamperApp aperta. Per gli avvisi a app chiusa usa il calendario Android.";
     }else{
-      $("deadlineNotificationState").textContent="Per avvisi anche quando CamperApp è chiusa, importa le scadenze nel calendario Android e controlla che l'avviso sia attivo.";
+      $("deadlineNotificationState").textContent="Per avvisi anche a CamperApp chiusa, usa Google Calendar per ogni scadenza e imposta manualmente il promemoria scelto.";
     }
   }
   function resetEditor(){
@@ -83,6 +83,7 @@ export function createDeadlineUI({db,getUser,getGroup,canWrite,onToast,onWriteFa
           $("deadlineCancelEdit").classList.remove("hidden");
           eventForm.scrollIntoView({behavior:"smooth",block:"center"});
         }),
+        button("Google Calendar",()=>openGoogleCalendar(entry)),
         button("Calendario (.ics)",()=>downloadCalendar([entry])),
         button("Elimina",async()=>{
           if(!confirm("Eliminare la scadenza «"+entry.title+"»?"))return;
@@ -93,6 +94,17 @@ export function createDeadlineUI({db,getUser,getGroup,canWrite,onToast,onWriteFa
     });
     displaySummary();
   }
+  function openGoogleCalendar(entry){
+    let timezone="Europe/Rome";
+    try{timezone=Intl.DateTimeFormat().resolvedOptions().timeZone||timezone;}catch{}
+    const url=deadlineGoogleCalendarUrl(entry,timezone);
+    if(!url){onToast("Scadenza non valida per il calendario.");return;}
+    window.open(url,"_blank","noopener");
+    $("deadlineNotificationState").textContent=
+      "L'evento è precompilato in Google Calendar. Prima di salvarlo imposta una notifica "+
+      (entry.leadDays===0?"per il giorno della scadenza":"di "+entry.leadDays+" giorni prima")+
+      ". Le modifiche future fatte in CamperApp non aggiornano automaticamente il calendario.";
+  }
   function downloadCalendar(selected){
     const items=selected.filter(item=>cleanDeadline(item));
     if(!items.length){onToast("Non ci sono scadenze da esportare.");return;}
@@ -102,7 +114,7 @@ export function createDeadlineUI({db,getUser,getGroup,canWrite,onToast,onWriteFa
     anchor.download=items.length===1?"camper-scadenza.ics":"camper-scadenzario.ics";
     document.body.appendChild(anchor);anchor.click();anchor.remove();
     setTimeout(()=>URL.revokeObjectURL(url),10000);
-    $("deadlineNotificationState").textContent="Calendario esportato. Apri il file .ics, importalo nel calendario Android e verifica il promemoria. L'esportazione non sincronizza automaticamente gli aggiornamenti successivi.";
+    $("deadlineNotificationState").textContent="File .ics esportato. Google Calendar per Android non lo importa direttamente: usa il sito web di Google Calendar o un calendario compatibile. Verifica sempre il promemoria e aggiorna manualmente gli eventi in caso di rinnovo.";
   }
   async function mutateDeadline(id,newValue){
     if(busy||!loaded||!group||!getUser())return false;
