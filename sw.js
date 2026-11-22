@@ -1,6 +1,6 @@
-const CACHE="camper-compagno-shell-v16";
-const SHELL=["./","./index.html","./styles.css","./manifest.webmanifest","./guide.js","./vademecum-data.js","./norme-sosta.js","./norme-regionali.js","./route-geo.js","./app.js"];
-const FRESH_FILES=new Set(["app.js","route-geo.js","guide.js","vademecum-data.js","norme-sosta.js","norme-regionali.js","styles.css","index.html","manifest.webmanifest"]);
+const CACHE="camper-compagno-shell-v17";
+const SHELL=["./","./index.html","./styles.css","./manifest.webmanifest","./guide.js","./vademecum-data.js","./norme-sosta.js","./norme-regionali.js","./route-geo.js","./deadline-utils.js","./deadlines-ui.js","./app.js"];
+const FRESH_FILES=new Set(["app.js","route-geo.js","deadline-utils.js","deadlines-ui.js","guide.js","vademecum-data.js","norme-sosta.js","norme-regionali.js","styles.css","index.html","manifest.webmanifest"]);
 
 // Warm the offline shell with the newest files instead of the browser's old HTTP cache.
 self.addEventListener("install",event=>event.waitUntil(
