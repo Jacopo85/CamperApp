@@ -153,12 +153,21 @@
       </section>
 
       <section id="tab-guide" class="tab-panel hidden">
-        <p class="eyebrow">VADEMECUM EUROPEO · DATI AGGIORNATI 22/11/2026</p><h2>Europa in camper</h2>
-        <div class="notice warning"><strong>66 schede con stato delle verifiche</strong><p>Consulta le 20 regioni italiane e i 46 Stati e territori europei. Le informazioni distinguono norme nazionali, provvedimenti regionali, fonti turistiche e verifiche mancanti. Le ordinanze comunali, i parchi e i singoli parcheggi cambiano: nessuna scheda sostituisce cartelli e autorizzazioni sul posto.</p></div>
+        <p class="eyebrow">VADEMECUM EUROPEO · EDIZIONE DOCUMENTATA 22/11/2026</p><h2>Europa in camper</h2>
+        <div class="notice warning"><strong>66 schede con fonti e limiti espliciti</strong><p>Per le 20 regioni italiane trovi prima la norma regionale, poi le regole generali dell’articolo 185 CdS. Per 46 Stati e territori europei trovi riferimenti documentati di diversa qualità: alcuni sono leggi, altri indicazioni istituzionali o turistiche, e altri ancora non confermano la sosta. Nessuna scheda sostituisce cartelli, ordinanze e regolamenti locali.</p></div>
         <label for="guideSearch">Cerca una regione o un Paese</label>
         <input id="guideSearch" type="search" placeholder="Es. Toscana, Francia, San Marino">
         <div id="guideList" class="guide-list"></div>
         <article id="guideDetail" class="card guide-detail hidden" aria-live="polite"></article>
+        <div class="card guide-local-card">
+          <h3>Controlla le ordinanze del Comune</h3>
+          <p class="muted small">Inserisci la località in cui vuoi fermarti. Apriremo una ricerca esterna delle regole locali: i risultati non sono verificati da CamperApp e vanno confermati sui siti ufficiali.</p>
+          <form id="guideLocalForm" class="route-actions">
+            <input id="guideLocality" type="text" maxlength="120" placeholder="Es. Cogne, Verona, Rovigno" aria-label="Comune o località" required>
+            <button type="submit" class="secondary">Cerca norme locali</button>
+          </form>
+          <p id="guideLocalStatus" class="small muted" role="status"></p>
+        </div>
       </section>
 
       <section id="tab-vehicle" class="tab-panel hidden">
