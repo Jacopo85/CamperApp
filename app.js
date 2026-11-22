@@ -23,7 +23,8 @@ const deadlines=createDeadlineUI({
   onToast:message=>toast(message),
   onWriteFailure:(label,error)=>writeFailed(label,error),
   onWriteSuccess:message=>writeSucceeded(message),
-  onOpenVehicle:()=>switchTab("vehicle")
+  onOpenVehicle:()=>switchTab("vehicle"),
+  onSync:(synced,failed=false)=>{deadlineSync=synced;if(failed)syncError=true;refreshSyncState();}
 });
 
 function writeNotice(text){
@@ -45,13 +46,13 @@ function writeFailed(label,error){
 }
 function writeSucceeded(label){writeNotice("");toast(label);}
 
-let shoppingSync=null, wishlistSync=null, vehicleSync=null, syncError=false;
+let shoppingSync=null, wishlistSync=null, vehicleSync=null, deadlineSync=null, syncError=false;
 let vehicleDirty=false;
 function setSync(text){ $("syncState").textContent=text; }
 function refreshSyncState(){
   if(!navigator.onLine){setSync("Offline · modifiche non garantite");return;}
   if(syncError){setSync("Errore sincronizzazione");return;}
-  if(shoppingSync===true && wishlistSync===true && vehicleSync===true){setSync("Dati sincronizzati");return;}
+  if(shoppingSync===true && wishlistSync===true && vehicleSync===true && deadlineSync===true){setSync("Dati sincronizzati");return;}
   setSync("Online · sincronizzazione in corso");
 }
 window.addEventListener("online",()=>{refreshSyncState();if(currentUser&&!groupId)void restoreCurrentGroup();});
@@ -86,7 +87,7 @@ async function restoreCurrentGroup(){
       :friendlyError(e));
   }finally{restoreInProgress=false;}
 }
-function cleanup(){deadlines.disconnect();stopNearbyMonitoring();[unsubShopping,unsubWishlist,unsubGroup,unsubVehicle].forEach(fn=>{if(fn)fn();});unsubShopping=unsubWishlist=unsubGroup=unsubVehicle=null;groupId=null;shoppingCache=[];wishlistCache=[];authorNames=new Map();shoppingSync=wishlistSync=vehicleSync=null;syncError=false;vehicleDirty=false;}
+function cleanup(){deadlines.disconnect();stopNearbyMonitoring();[unsubShopping,unsubWishlist,unsubGroup,unsubVehicle].forEach(fn=>{if(fn)fn();});unsubShopping=unsubWishlist=unsubGroup=unsubVehicle=null;groupId=null;shoppingCache=[];wishlistCache=[];authorNames=new Map();shoppingSync=wishlistSync=vehicleSync=deadlineSync=null;syncError=false;vehicleDirty=false;}
 // I nomi sono associati agli UID dei membri; non viene modificato Firestore.
 function memberDisplayName(email){
   // Non pubblicare nel sorgente gli indirizzi email completi degli account familiari.
