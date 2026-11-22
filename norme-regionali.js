@@ -2,26 +2,34 @@
 /* Un riferimento a un'area ricettiva non determina permessi di sosta stradale. */
 export const normeRegionali = {
   "Valle d’Aosta": {
-    "stato": "Non verificata a livello regionale",
-    "dettaglio": "La fonte regionale consultata classifica campeggi e aree attrezzate, ma non permette di dedurre la disciplina della sosta o del campeggio libero per il singolo luogo.",
-    "limiti": "Resta da verificare la disciplina del singolo Comune, delle aree protette e dell'area di sosta interessata. Le regole sulle strutture autorizzate non equivalgono a un permesso generale di campeggio libero.",
+    "stato": "Riferimento regionale alle strutture all'aperto: LR 8/2002; sosta libera e norme locali da verificare",
+    "dettaglio": "La Regione Valle d'Aosta rende disponibile la LR 24 giugno 2002 n. 8 sui complessi ricettivi all'aperto e riconosce le aree attrezzate di sosta autocaravan tra le attività ricettive. Le disposizioni sulle strutture turistiche non attribuiscono un diritto di pernottamento o campeggio libero in qualsiasi parcheggio.",
+    "limiti": "Verificare il testo vigente, le norme specifiche di ciascun Comune, i vincoli di parchi e zone montane, gli orari e l'accessibilità delle strutture.",
     "verificatoIl": "22/11/2026",
     "fonti": [
       {
-        "titolo": "Regione Valle d'Aosta – glossario strutture ricettive",
-        "url": "https://www.regione.vda.it/statistica/pubblicazioni/annuari/annuario2025/SITE/GLOSSARI.HTM"
+        "titolo": "Regione Valle d'Aosta – documentazione strutture ricettive, LR 8/2002",
+        "url": "https://www.regione.vda.it/asstur/strutture/documentazione_i.asp"
+      },
+      {
+        "titolo": "Regione Valle d'Aosta – attività ricettive e aree sosta autocaravan",
+        "url": "https://www.regione.vda.it/asstur/agevolazionituristicoricettive/default_i.aspx"
       }
     ]
   },
   "Piemonte": {
-    "stato": "Riferimento regionale sulle aree del turismo itinerante",
-    "dettaglio": "La Regione descrive aree attrezzate, camper service e punti sosta; le modalità d'uso degli specifici punti sosta e il loro regolamento dipendono dagli enti competenti.",
-    "limiti": "Resta da verificare la disciplina del singolo Comune, delle aree protette e dell'area di sosta interessata. Le regole sulle strutture autorizzate non equivalgono a un permesso generale di campeggio libero.",
+    "stato": "Disciplina regionale delle aree per turismo itinerante: LR 5/2019, art. 8",
+    "dettaglio": "La Regione Piemonte disciplina, attraverso la LR 5/2019, le aree del turismo itinerante, distinguendo aree sosta e camper service; i Comuni e gli enti locali promuovono aree e servizi dedicati. L'esistenza di queste categorie non autorizza un campeggio libero in qualsiasi parcheggio.",
+    "limiti": "Controllare i regolamenti del Comune e del gestore, la classificazione della singola area e le prescrizioni di accesso, di durata e di scarico.",
     "verificatoIl": "22/11/2026",
     "fonti": [
       {
         "titolo": "Regione Piemonte – aree per il turismo itinerante",
         "url": "https://www.regione.piemonte.it/web/temi/cultura-turismo-sport/turismo/offerta-ricettiva/aree-per-turismo-itinerante"
+      },
+      {
+        "titolo": "Regione Piemonte – bando attuativo LR 5/2019, art. 8",
+        "url": "https://bandi.regione.piemonte.it/contributi-finanziamenti/aree-di-sosta"
       }
     ]
   },
@@ -262,14 +270,18 @@ export const normeRegionali = {
     ]
   },
   "Sardegna": {
-    "stato": "Riferimenti regionali a aree di sosta turistica",
-    "dettaglio": "La Regione ha previsto nuove misure e direttive per le aree di sosta temporanea per camper e caravan; l'utilizzo concreto dipende dalle aree autorizzate e dalle prescrizioni comunali.",
-    "limiti": "Resta da verificare la disciplina del singolo Comune, delle aree protette e dell'area di sosta interessata. Le regole sulle strutture autorizzate non equivalgono a un permesso generale di campeggio libero.",
+    "stato": "Legge regionale 7/2022 su aree attrezzate: 72 ore, con deroga limitata a 120 ore",
+    "dettaglio": "La LR Sardegna 11 aprile 2022 n. 7 modifica l'art. 21 della LR 16/2017. Per le aree attrezzate di sosta temporanea a fini turistici prevede una sosta occasionale fino a 72 ore consecutive; una quota non superiore al 30% delle piazzole può consentire permanenze fino a 120 ore. Le aree devono prevedere dotazioni tra cui pozzetto di scarico e acqua potabile. Questi limiti riguardano le aree attrezzate della legge, NON tutti i parcheggi stradali.",
+    "limiti": "Controllare regolamento comunale e della specifica area, aperture, eventuali cambi normativi successivi e le restrizioni ambientali e costiere.",
     "verificatoIl": "22/11/2026",
     "fonti": [
       {
-        "titolo": "Regione Sardegna – aree di sosta temporanea",
-        "url": "https://www.regione.sardegna.it/notizie/34-giunta-regionale-le-delibere-adottate"
+        "titolo": "Regione Sardegna – LR 7/2022, art. 1 (testo PDF)",
+        "url": "https://www.regione.sardegna.it/documenti/1_38_20220512101253.pdf"
+      },
+      {
+        "titolo": "Regione Sardegna – scheda ufficiale della LR 7/2022",
+        "url": "https://www.regione.sardegna.it/regione/leggi-e-delibere/leggi-regionali/legge-regionale-11-aprile-2022-n-7"
       }
     ]
   }
