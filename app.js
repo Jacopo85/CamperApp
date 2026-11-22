@@ -3,6 +3,7 @@ import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWith
 import { getFirestore, doc, getDoc, setDoc, addDoc, collection, onSnapshot, updateDoc, deleteDoc, serverTimestamp, query, orderBy, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
 import { gpsPoint, gpsDistanceKm, arrangeByAirDistance, gpsOrigin } from "./route-geo.js";
+import { createDeadlineUI } from "./deadlines-ui.js";
 
 const $ = id => document.getElementById(id);
 const app = initializeApp(firebaseConfig);
@@ -14,6 +15,16 @@ let authorNames = new Map();
 const show = (id, yes=true) => $(id).classList.toggle("hidden", !yes);
 const msg = (id, text) => { $(id).textContent = text || ""; };
 function toast(text){ const t=$("toast"); t.textContent=text; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2600); }
+const deadlines=createDeadlineUI({
+  db,
+  getUser:()=>currentUser,
+  getGroup:()=>groupId,
+  canWrite:()=>canWrite(),
+  onToast:message=>toast(message),
+  onWriteFailure:(label,error)=>writeFailed(label,error),
+  onWriteSuccess:message=>writeSucceeded(message),
+  onOpenVehicle:()=>switchTab("vehicle")
+});
 
 function writeNotice(text){
   const notice=$("writeState");
@@ -75,7 +86,7 @@ async function restoreCurrentGroup(){
       :friendlyError(e));
   }finally{restoreInProgress=false;}
 }
-function cleanup(){stopNearbyMonitoring();[unsubShopping,unsubWishlist,unsubGroup,unsubVehicle].forEach(fn=>{if(fn)fn();});unsubShopping=unsubWishlist=unsubGroup=unsubVehicle=null;groupId=null;shoppingCache=[];wishlistCache=[];authorNames=new Map();shoppingSync=wishlistSync=vehicleSync=null;syncError=false;vehicleDirty=false;}
+function cleanup(){deadlines.disconnect();stopNearbyMonitoring();[unsubShopping,unsubWishlist,unsubGroup,unsubVehicle].forEach(fn=>{if(fn)fn();});unsubShopping=unsubWishlist=unsubGroup=unsubVehicle=null;groupId=null;shoppingCache=[];wishlistCache=[];authorNames=new Map();shoppingSync=wishlistSync=vehicleSync=null;syncError=false;vehicleDirty=false;}
 // I nomi sono associati agli UID dei membri; non viene modificato Firestore.
 function memberDisplayName(email){
   // Non pubblicare nel sorgente gli indirizzi email completi degli account familiari.
@@ -124,6 +135,7 @@ async function loadGroup(gid){
     wishlistCache=snap.docs.map(d=>({id:d.id,...d.data()})); wishlistSync=!snap.metadata.fromCache&&!snap.metadata.hasPendingWrites;refreshSyncState();renderWishlist(); renderSavedPlaces(); updateNearbyState(); updateSummaries();
   },err=>{syncError=true;refreshSyncState();toast("Errore mete: "+err.message);});
   // Ricevi gli aggiornamenti dei dati camper dagli altri dispositivi.
+  deadlines.connect(gid);
   unsubVehicle=onSnapshot(doc(db,"groups",gid,"settings","vehicle"),{includeMetadataChanges:true},snap=>{
     vehicleSync=!snap.metadata.fromCache&&!snap.metadata.hasPendingWrites;
     refreshSyncState();
