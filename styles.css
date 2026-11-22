@@ -56,3 +56,32 @@
 .route-plan-day>button{margin-top:12px}
 .route-plan-searches a{overflow-wrap:anywhere}
 @media(max-width:520px){.gps-editor input{flex:1;min-width:118px}.route-plan-day>button{width:100%}}
+
+/* Scadenzario privato, condiviso nei dati del gruppo */
+.deadline-banner{display:block;width:100%;margin:10px 0 14px;padding:12px 15px;text-align:left;font-weight:650;border:1px solid #d7a65b;border-radius:10px;background:#fff4dc;color:#65430e;white-space:normal}
+.deadline-banner.hidden{display:none}
+.camper-deadlines{margin:18px 0}
+.deadline-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:end}
+.deadline-form label{display:flex;flex-direction:column;gap:6px;min-width:0}
+.deadline-form input,.deadline-form select,.deadline-form textarea{width:100%;box-sizing:border-box}
+.deadline-wide{grid-column:1/-1}
+.deadline-actions,.deadline-toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin:12px 0}
+.deadline-actions button,.deadline-toolbar button{white-space:normal}
+.deadline-list{display:grid;gap:10px;margin:15px 0 5px}
+.deadline-entry{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:12px;padding:13px;border:1px solid #d5ded9;border-radius:10px;background:var(--card,#fff)}
+.deadline-entry-info{flex:1;min-width:170px}
+.deadline-entry-info p{margin:7px 0}
+.deadline-entry-buttons{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
+.deadline-status{display:inline-block;border-radius:7px;padding:5px 8px;font-size:.875rem;font-weight:650;background:#eef3f0;color:#315e4e}
+.deadline-status.deadline-overdue{background:#ffe1e1;color:#8c2626}
+.deadline-status.deadline-today{background:#ffe4c4;color:#7c4309}
+.deadline-status.deadline-soon{background:#fff2d5;color:#755114}
+.deadline-entry.deadline-overdue{border-left:4px solid #bd5656}
+.deadline-entry.deadline-today,.deadline-entry.deadline-soon{border-left:4px solid #cb9a41}
+@media(max-width:600px){
+  .deadline-form{grid-template-columns:1fr}
+  .deadline-wide{grid-column:1}
+  .deadline-entry-buttons{width:100%}
+  .deadline-entry-buttons button{flex:1;min-width:90px}
+  .deadline-toolbar button{flex:1;min-width:145px}
+}
