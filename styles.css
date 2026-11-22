@@ -44,3 +44,15 @@
 
 /* Ricerca manuale delle ordinanze locali, senza richieste API o dati Firebase */
 .guide-local-card{margin-top:14px}.guide-local-card .route-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.guide-local-card input{flex:1;min-width:190px;min-height:40px}
+
+/* GPS facoltativo, ricerca eventi e avvisi soltanto a PWA aperta */
+.gps-details{margin-top:10px;border-top:1px solid #d9e2dd;padding-top:8px;max-width:100%}
+.gps-details summary{cursor:pointer;color:#316454;font-weight:600}
+.gps-editor{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin-top:10px}
+.gps-editor input{width:130px;max-width:100%;min-height:40px}
+.gps-editor small{width:100%}
+.route-nearby-list{padding-left:23px;margin-top:8px;line-height:1.6}
+.route-nearby-list li{margin:7px 0}
+.route-plan-day>button{margin-top:12px}
+.route-plan-searches a{overflow-wrap:anywhere}
+@media(max-width:520px){.gps-editor input{flex:1;min-width:118px}.route-plan-day>button{width:100%}}
