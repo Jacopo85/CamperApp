@@ -1,4 +1,4 @@
-const CACHE="camper-compagno-shell-v17";
+const CACHE="camper-compagno-shell-v18";
 const SHELL=["./","./index.html","./styles.css","./manifest.webmanifest","./guide.js","./vademecum-data.js","./norme-sosta.js","./norme-regionali.js","./route-geo.js","./deadline-utils.js","./deadlines-ui.js","./app.js"];
 const FRESH_FILES=new Set(["app.js","route-geo.js","deadline-utils.js","deadlines-ui.js","guide.js","vademecum-data.js","norme-sosta.js","norme-regionali.js","styles.css","index.html","manifest.webmanifest"]);
 
