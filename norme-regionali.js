@@ -149,7 +149,7 @@ export const normeRegionali = {
     "fonti": [
       {
         "titolo": "Regione Umbria – strutture all'aria aperta",
-        "url": "https://www.regione.umbria.it/la-presidente?_101_assetEntryId=1994345&_101_returnToFullPageURL=https%3A%2F%2Fwww.regione.umbria.it%2Fla-presidente%3Fp_p_id%3D3%26p_p_lifecycle%3D1%26p_p_state_rcv%3D1&_101_struts_action=%2Fasset_publisher%2Fview_content&_101_type=content&_101_urlTitle=esercizi-all-aria-aperta&inheritRedirect=true&p_p_id=101&p_p_lifecycle=0&p_p_mode=view&p_p_state=maximized"
+        "url": "https://www.regione.umbria.it/turismo-attivita-sportive/esercizi-all-aria-aperta"
       }
     ]
   },
