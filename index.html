@@ -218,15 +218,15 @@
           <p id="deadlineSyncState" class="small muted" role="status">Caricamento scadenze…</p>
           <div class="deadline-toolbar">
             <button id="deadlineEnableNotifications" type="button" class="secondary">🔔 Attiva avvisi con app aperta</button>
-            <button id="deadlineExportAll" type="button" class="secondary" disabled>📆 Esporta tutte nel calendario</button>
+            <button id="deadlineExportAll" type="button" class="secondary" disabled>📆 Esporta tutte (.ics)</button>
           </div>
-          <p id="deadlineNotificationState" class="small muted" role="status">Per ricevere avvisi anche quando CamperApp è chiusa, importa le scadenze nel calendario Android e verifica che gli avvisi siano attivi.</p>
+          <p id="deadlineNotificationState" class="small muted" role="status">Per avere notifiche anche con CamperApp chiusa, usa il pulsante Google Calendar delle scadenze e imposta il preavviso nell’evento. La creazione va confermata manualmente.</p>
           <div id="deadlineList" class="deadline-list" aria-live="polite"></div>
-          <p class="small muted">Il calendario .ics include il preavviso scelto alle 09:00, ma è necessario importarlo sul dispositivo e verificare che il calendario mantenga l'avviso. Quando rinnovi un documento, modifica la scadenza anche nel calendario.</p>
+          <p class="small muted">Il file .ics include il preavviso scelto alle 09:00, per calendari compatibili. Google Calendar su Android non importa direttamente .ics: usa il pulsante Google Calendar e imposta la notifica. Dopo un rinnovo aggiorna anche il calendario.</p>
         </div>
         <div class="notice warning"><strong>Importante</strong><p>Queste misure sono promemoria per valutare soste e itinerari. La prima versione non calcola percorsi stradali certificati per camper e non può garantire che una strada sia transitabile.</p></div>
       </section>
-      <footer class="app-footer">CamperApp Family · versione 16 · <span id="userLabel"></span></footer>
+      <footer class="app-footer">CamperApp Family · versione 17 · <span id="userLabel"></span></footer>
     </section>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
