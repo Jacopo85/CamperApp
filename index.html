@@ -96,10 +96,13 @@
         <form id="wishlistForm" class="add-form wishlist-form">
           <label class="grow">Nome della meta<input id="placeName" required maxlength="120" placeholder="Es. borgo, museo, lago"></label>
           <label>Indirizzo o località<input id="placeAddress" maxlength="200" placeholder="Comune, Paese"></label>
+          <label>Latitudine GPS (facoltativa)<input id="placeLatitude" inputmode="decimal" type="text" placeholder="Es. 45.4408"></label>
+          <label>Longitudine GPS (facoltativa)<input id="placeLongitude" inputmode="decimal" type="text" placeholder="Es. 12.3155"></label>
           <label>Priorità<select id="placePriority"><option value="media">Media</option><option value="alta">Alta</option><option value="bassa">Bassa</option></select></label>
           <label>Note<textarea id="placeNotes" maxlength="1000" rows="2" placeholder="Cosa vorremmo vedere…"></textarea></label>
           <button type="submit">Salva meta</button>
         </form>
+        <p class="small muted">Le coordinate si possono copiare da Google Maps. Sono facoltative, ma servono per gli avvisi di prossimità e il riordino geografico. Puoi aggiungerle anche a mete già salvate.</p>
         <ul id="wishlistList" class="item-list"></ul>
         <p id="wishlistEmpty" class="empty-state">Non avete ancora salvato mete.</p>
       </section>
@@ -119,13 +122,15 @@
             <input id="routeWaypoints" type="text" placeholder="Es. Parma; Bologna">
           </label>
           <button type="submit">Apri itinerario in Google Maps</button>
+          <p class="small muted">Su browser Android Google Maps accetta fino a 3 tappe intermedie. Per viaggi lunghi usa i collegamenti di ciascuna giornata.</p>
         </form>
         <div class="card route-stops-card">
           <h3>Proposta di viaggio per zona e giorni</h3>
-          <p class="muted">Crea una bozza con fino a due mete per giorno. La ricerca privilegia la località indicata nell’indirizzo; le sole note sono facoltative. Puoi riordinare le mete e cercare servizi. Non è una verifica delle distanze geografiche o dei tempi di guida.</p>
+          <p class="muted">Crea una bozza con fino a due mete per giorno. Se almeno due mete hanno coordinate GPS, le dispone per prossimità in linea d’aria; altrimenti mantiene le priorità testuali. Ricerca esternamente campeggi, servizi ed eventi della data scelta. Non calcola distanze o tempi di guida su strada.</p>
           <div class="route-plan-controls">
             <label>Zona o località<input id="planArea" type="text" maxlength="100" placeholder="Es. Toscana, Umbria, lago di Garda"></label>
             <label>Numero di giorni<input id="planDays" type="number" min="1" max="14" value="3"></label>
+            <label>Data di partenza (facoltativa)<input id="planStartDate" type="date"></label>
             <label class="route-plan-notes"><input id="planIncludeNotes" type="checkbox"> Includi anche le mete che citano la zona solo nelle note</label>
             <button id="planGenerateBtn" type="button" class="secondary">Prepara proposta</button>
           </div>
@@ -134,12 +139,23 @@
           <button id="planApplyBtn" type="button" class="secondary hidden">Trasferisci le tappe al percorso</button>
         </div>
         <div class="card route-stops-card">
+          <h3>Avvisi di prossimità alle mete</h3>
+          <p class="small muted">Funzione gratuita: richiede coordinate salvate e consenso alla posizione. Funziona solo mentre CamperApp è aperta e il dispositivo consente la geolocalizzazione; non è un avviso garantito in background.</p>
+          <div class="route-actions">
+            <label>Raggio avviso<select id="nearbyRadius"><option value="0.5">500 metri</option><option value="1" selected>1 km</option><option value="2">2 km</option><option value="5">5 km</option></select></label>
+            <button id="nearbyStart" type="button" class="secondary">Attiva avvisi GPS</button>
+            <button id="nearbyStop" type="button" class="secondary" disabled>Interrompi</button>
+          </div>
+          <p id="nearbyState" class="muted small" role="status">Avvisi disattivati.</p>
+          <ul id="nearbyMatches" class="route-nearby-list" aria-live="polite"></ul>
+        </div>
+        <div class="card route-stops-card">
           <h3>Le mete salvate dalla famiglia</h3>
           <p class="muted">Usa una meta come destinazione oppure aggiungila alle tappe. L'ordine delle tappe resta modificabile nel campo sopra.</p>
           <div id="routeSavedPlaces" class="route-saved-places" aria-live="polite"></div>
         </div>
         <div class="card route-stops-card">
-          <h3>Campeggi e aree sosta</h3>
+          <h3>Campeggi, aree sosta e servizi</h3>
           <p class="muted">Cerca strutture vicino alla destinazione o alle tappe del viaggio. I risultati si aprono in Google Maps: verifica direttamente disponibilità, accesso e dimensioni ammesse.</p>
           <div class="route-actions">
             <button id="searchCampgroundsBtn" type="button" class="secondary">🏕️ Cerca campeggi</button>
@@ -181,7 +197,7 @@
         </form>
         <div class="notice warning"><strong>Importante</strong><p>Queste misure sono promemoria per valutare soste e itinerari. La prima versione non calcola percorsi stradali certificati per camper e non può garantire che una strada sia transitabile.</p></div>
       </section>
-      <footer class="app-footer">Camper Compagno · versione iniziale · <span id="userLabel"></span></footer>
+      <footer class="app-footer">CamperApp Family · versione 16 · <span id="userLabel"></span></footer>
     </section>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
