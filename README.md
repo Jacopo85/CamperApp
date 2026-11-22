@@ -26,6 +26,25 @@ Applicazione web privata nell'utilizzo familiare, distribuita tramite **GitHub P
 
 La posizione letta durante il monitoraggio non viene inviata a Firestore né a servizi di localizzazione aggiuntivi. **Le coordinate delle mete salvate sono invece dati sincronizzati su Firestore**, come gli indirizzi e le note.
 
+## Scadenzario del camper (versione 17)
+
+Nella scheda **Camper** trovi lo scadenzario condiviso per **bollo, assicurazione, tagliando, revisione, manutenzione e altri appuntamenti**. Le date vanno inserite manualmente: l'app non presume scadenze legali valide per tutti i mezzi o le assicurazioni.
+
+Ogni voce contiene categoria, descrizione, data, preavviso selezionabile **0, 1, 3, 7, 15, 30, 60 o 90 giorni** e note facoltative. Si può modificare la data dopo un rinnovo o eliminare la voce. Le scadenze vicine o superate sono evidenziate in **Home**, nella pagina Camper e nella lista.
+
+Le scadenze vengono salvate in `groups/{groupId}/settings/deadlines`, un documento della raccolta `settings` già utilizzata dall'app per i dati del veicolo. Si usa una transazione Firestore per evitare la perdita di aggiornamenti contemporanei; non sono necessarie nuove collezioni né modifiche alle regole Firebase esistenti. Le note sono condivise fra gli account: evitare codici, numeri di polizza completi o documenti riservati.
+
+### Promemoria sui dispositivi Android
+
+- **Avvisi nell'app:** lo scadenzario mostra le voci entro il preavviso scelto e quelle scadute ogni volta che apri CamperApp e hai accesso ai dati.
+- **Notifica web facoltativa:** nella pagina Camper premi **Attiva avvisi con app aperta** e autorizza il browser. Mostra una notifica quando CamperApp è attiva e la scadenza entra nel periodo di preavviso, se il browser supporta le notifiche. La notifica viene emessa una sola volta per scadenza, data e preavviso su quel dispositivo, per evitare ripetizioni.
+- **Notifica anche con CamperApp chiusa, senza PC:** su una scadenza tocca **Google Calendar**. Si apre un evento precompilato alle 09:00; **imposta manualmente la notifica del numero di giorni scelto e salva l'evento**. L'app non può impostare automaticamente il promemoria di Google Calendar tramite il semplice link. Verifica la comparsa dell'evento e dell'avviso nel calendario Android.
+- **Esportazione per altri calendari:** il pulsante **Calendario (.ics)** su una singola voce o **Esporta tutte (.ics)** produce un file con evento alle 09:00 e preavviso iCalendar. Il file va importato manualmente in un calendario compatibile: **Google Calendar su Android non importa direttamente i file .ics**, mentre Google Calendar nel browser desktop permette l'importazione. Controlla che il promemoria venga mantenuto.
+- L'evento nel calendario non si aggiorna automaticamente quando cambi o elimini una scadenza in CamperApp. Devi correggere o eliminare anche l'evento calendario. Non reimportare più volte senza controllare i duplicati.
+- Il download .ics contiene le informazioni inserite nella scadenza. Condividilo soltanto con i dispositivi familiari autorizzati.
+
+**Importante:** GitHub Pages è un sito statico: senza un servizio push e un processo attivo sul server, CamperApp **non può promettere una notifica automatica quando la web app è completamente chiusa**. L'alternativa gratuita consigliata è il Calendario Android, dopo aver verificato il preavviso.
+
 ## Eventi, campeggi e itinerari
 
 Le ricerche di eventi, sagre, campeggi, aree sosta e camper service aprono siti esterni. CamperApp **non verifica automaticamente** orari, disponibilità, prezzi, idoneità alle dimensioni del veicolo o date effettive delle manifestazioni. I link per singola giornata aiutano a evitare l'eccesso di tappe dei collegamenti Google Maps.
