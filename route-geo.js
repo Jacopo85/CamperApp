@@ -1,7 +1,7 @@
 // Calcoli geografici puri e offline: distanze in linea d'aria, NON stradali.
 export function gpsPoint(place){
   if(!place || place.latitude===null || place.longitude===null ||
-    place.latitude==="" || place.longitude==="" ||
+    String(place.latitude).trim()==="" || String(place.longitude).trim()==="" ||
     place.latitude===undefined || place.longitude===undefined)return null;
   const latitude=Number(place.latitude),longitude=Number(place.longitude);
   if(!Number.isFinite(latitude)||!Number.isFinite(longitude)||
