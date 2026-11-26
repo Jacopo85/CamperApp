@@ -85,3 +85,248 @@
   .deadline-entry-buttons button{flex:1;min-width:90px}
   .deadline-toolbar button{flex:1;min-width:145px}
 }
+
+
+/* CamperApp Family v21 · Family Travel
+   Restyling solo visuale: nessuna dipendenza esterna e nessuna modifica alle funzioni. */
+:root{
+  --family-forest:#245a49;
+  --family-forest-dark:#194b3d;
+  --family-sage:#a4c5af;
+  --family-sand:#f1c27d;
+  --family-coral:#d95d62;
+  --family-cream:#f5f8f3;
+  --family-ink:#213d34;
+  --family-muted:#61766d;
+  --card:#fff;
+  --soft:#eaf2eb;
+  --border:#dce7df;
+  color:var(--family-ink);
+  background:var(--family-cream);
+  color-scheme:light;
+}
+body{
+  isolation:isolate;
+  background:linear-gradient(145deg,#f9fbf7 0%,#edf5ee 48%,#f8f3e8 100%);
+}
+body::before{
+  content:"";
+  position:fixed;
+  z-index:0;
+  pointer-events:none;
+  inset:0;
+  background-image:url("./icon-512.png");
+  background-position:center 55%;
+  background-repeat:no-repeat;
+  background-size:min(75vw,590px) auto;
+  opacity:.065;
+}
+body>.topbar,body>main{
+  position:relative;
+  z-index:1;
+}
+.topbar{
+  background:linear-gradient(115deg,#194b3d 0%,#245a49 61%,#397561 100%);
+  border-bottom:1px solid #ffffff26;
+  padding:15px clamp(16px,4vw,36px);
+  box-shadow:0 10px 24px #143b2a1c;
+}
+.brand-mark{
+  background:#ffffffec;
+  border:1px solid #ffffffb5;
+  border-radius:17px;
+  padding:4px;
+  display:grid;
+  place-items:center;
+  width:52px;
+  height:52px;
+  overflow:hidden;
+  box-shadow:0 4px 14px #0f332329;
+  flex:0 0 auto;
+}
+.brand-mark img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:13px;
+}
+.topbar h1{font-size:clamp(18px,2.4vw,23px);letter-spacing:-.025em;font-weight:800}
+.topbar p{color:#e2f0e8;font-size:12px}
+main{max-width:1080px;padding-top:24px}
+.panel,.card,.route-stops-card,.route-plan-day,.guide-details,.camper-deadlines{
+  background:#fffffff5;
+  border:1px solid var(--border);
+  border-radius:19px;
+  box-shadow:0 7px 24px #1a514011;
+}
+.panel{padding:clamp(17px,3vw,26px)}
+.panel h2,h2{color:var(--family-ink);letter-spacing:-.025em}
+.hero{
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(123deg,#194b3d 0%,#245a49 60%,#47816a 100%);
+  border:1px solid #ffffff3b;
+  border-radius:24px;
+  padding:clamp(24px,4vw,39px);
+  box-shadow:0 12px 30px #245a4930;
+}
+.hero::after{
+  content:"♥";
+  position:absolute;
+  right:22px;
+  top:50%;
+  transform:translateY(-50%) rotate(-12deg);
+  font-size:clamp(64px,14vw,138px);
+  font-weight:700;
+  opacity:.10;
+  pointer-events:none;
+  color:white;
+}
+.hero h2,.hero p{position:relative;z-index:1}
+.hero h2{color:white;line-height:1.15;max-width:560px;font-weight:800}
+.hero p:last-child{color:#e5f1e9}
+.eyebrow{color:#557969;letter-spacing:.13em}
+.hero .eyebrow{color:#f1d7a4}
+.welcome-row{flex-wrap:wrap}
+.sync-pill{
+  background:#e1eee3;
+  color:#245a49;
+  border:1px solid #cce0cf;
+  font-weight:650;
+  padding:8px 12px;
+}
+.tabs{
+  position:relative;
+  gap:7px;
+  padding:7px;
+  margin:12px 0 19px;
+  border-radius:16px;
+  background:#e3ede4e6;
+  border:1px solid #d5e5d9;
+  scrollbar-width:thin;
+  scroll-padding-inline:8px;
+  -webkit-overflow-scrolling:touch;
+}
+.tab{
+  border-radius:12px;
+  background:transparent;
+  color:#375b4c;
+  padding:11px 15px;
+  min-height:44px;
+  flex:0 0 auto;
+  transition:background-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.tab.active{
+  background:#245a49;
+  color:#fff;
+  box-shadow:0 3px 10px #245a4930;
+}
+.tab:hover:not(.active){background:#ffffffb8}
+.dashboard-grid{gap:14px}
+.dash-card{
+  min-height:150px;
+  border:1px solid #dce7df;
+  background:linear-gradient(158deg,#fff,#fbfdfb);
+  border-radius:20px;
+  padding:19px;
+  box-shadow:0 5px 16px #1e49320b;
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;
+  overflow-wrap:anywhere;
+}
+.dash-card>span{
+  display:grid;
+  place-items:center;
+  width:46px;
+  height:46px;
+  border-radius:14px;
+  background:#e7f1e9;
+  font-size:24px;
+}
+.dash-card:nth-child(4n+2)>span{background:#fff0d9}
+.dash-card:nth-child(4n+3)>span{background:#fce8e7}
+.dash-card strong{color:var(--family-ink);font-size:16px}
+.dash-card small{color:var(--family-muted);font-size:12px;line-height:1.5}
+@media(hover:hover) and (pointer:fine){
+  .dash-card:hover{
+    transform:translateY(-3px);
+    border-color:#a9cdb5;
+    box-shadow:0 12px 26px #194b3d1c;
+  }
+  button:not(:disabled):hover{filter:brightness(1.055)}
+}
+button{
+  background:var(--family-forest);
+  border-radius:12px;
+  transition:transform .16s ease,background-color .16s ease,filter .16s ease;
+}
+button:active:not(:disabled){transform:scale(.985)}
+button.secondary,.icon-btn{
+  background:#e6f0e8;
+  color:#255845;
+}
+button.quiet{background:#ffffff24;color:#fff}
+button:focus-visible,a:focus-visible{
+  outline:3px solid #ecb65b;
+  outline-offset:3px;
+}
+button:disabled{opacity:.6;cursor:not-allowed}
+input,select,textarea{
+  border-color:#cdded2;
+  background:#fff;
+  border-radius:12px;
+  color:var(--family-ink);
+}
+input:focus,select:focus,textarea:focus{
+  outline:3px solid #8fc4a555;
+  border-color:#357b61;
+}
+.notice{
+  border-radius:16px;
+  background:#edf6edeb;
+  border-color:#d6e5d9;
+}
+.notice.warning{background:#fff7e6;border-color:#e9d8b7;color:#674a17}
+.add-form{
+  background:#f0f6f1e9;
+  border:1px solid #dfeae1;
+  border-radius:17px;
+  padding:14px;
+}
+.item-row,.route-place-row,.deadline-entry{
+  border-radius:16px;
+  border-color:#dce7df;
+  background:#fffffff2;
+  box-shadow:0 3px 12px #194b3d0a;
+}
+.item-title{color:var(--family-ink)}
+.item-meta,.muted{color:var(--family-muted)}
+.route-plan-day,.route-stops-card,.guide-details{padding:clamp(12px,2vw,18px)}
+.route-plan-searches a,.route-search-list a{background:#e8f2e9;border-radius:12px;color:#245a49}
+.deadline-status.deadline-overdue{background:#fde8e8;color:#8e2529}
+.deadline-status.deadline-today{background:#fff0db;color:#76501a}
+.deadline-status.deadline-soon{background:#fff5df;color:#775516}
+.deadline-banner{
+  border-radius:14px;
+  background:#fff4df;
+  border-color:#e6c58e;
+  color:#6a4818;
+}
+.toast{z-index:20}
+@media(max-width:600px){
+  body::before{background-size:90vw auto;opacity:.045}
+  main{padding:16px 13px 45px}
+  .topbar{padding:12px 15px}
+  .brand-mark{width:46px;height:46px}
+  .dashboard-grid{gap:10px}
+  .dash-card{padding:13px;min-height:137px;border-radius:16px}
+  .dash-card>span{width:40px;height:40px;font-size:22px}
+  .hero{border-radius:20px}
+  .tabs{margin:8px 0 15px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    transition-duration:.01ms!important;
+    animation-duration:.01ms!important;
+    scroll-behavior:auto!important;
+  }
+}
