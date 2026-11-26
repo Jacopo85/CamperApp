@@ -121,7 +121,7 @@ body::before{
   background-size:min(75vw,590px) auto;
   opacity:.065;
 }
-body>.topbar,body>main,body>.toast{
+body>.topbar,body>main{
   position:relative;
   z-index:1;
 }
