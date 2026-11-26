@@ -4,8 +4,8 @@
   "description": "CamperApp Family: itinerari, liste e scadenze condivise in famiglia",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#f3f6f4",
-  "theme_color": "#1f5548",
+  "background_color": "#f5f8f3",
+  "theme_color": "#245a49",
   "icons": [
     {
       "src": "./icon-192.png",
